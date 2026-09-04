@@ -11,6 +11,9 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -992,671 +995,408 @@
             <input name="CORREO" type="email" class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
           </label>
           <label class="block md:col-span-2">
-            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Web</span>
-            <input name="WEB" placeholder="https://..." class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Sitio Web</span>
+            <input name="WEB" placeholder="https://ejemplo.com" class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
           </label>
         </div>
       </div>
 
       <div class="flex items-center justify-end gap-3 border-t border-slate-200/10 px-5 py-4">
-        <button type="button" id="cancelBtn" class="rounded-lg border border-slate-200/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-slate-200 transition hover:bg-white/10">Cancelar</button>
-        <button id="saveBtn" type="submit" class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-300 to-cyan-300 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-glow transition hover:brightness-110">
-          <i data-lucide="save" class="h-4 w-4"></i>
-          Guardar
+        <button type="button" id="cancelBtn" class="rounded-lg border border-slate-200/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-white/10">
+          Cancelar
+        </button>
+        <button type="submit" id="saveBtn" class="flex items-center gap-2 rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-emerald-600">
+          <i data-lucide="check" class="h-4 w-4"></i>
+          Guardar Registro
         </button>
       </div>
     </form>
   </div>
 
-  <datalist id="venezuelaStates"></datalist>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <datalist id="venezuelaStates">
+    <option value="Amazonas"></option>
+    <option value="Anzoátegui"></option>
+    <option value="Apure"></option>
+    <option value="Aragua"></option>
+    <option value="Barinas"></option>
+    <option value="Bolívar"></option>
+    <option value="Carabobo"></option>
+    <option value="Cojedes"></option>
+    <option value="Delta Amacuro"></option>
+    <option value="Distrito Capital"></option>
+    <option value="Falcón"></option>
+    <option value="Guárico"></option>
+    <option value="Lara"></option>
+    <option value="Mérida"></option>
+    <option value="Miranda"></option>
+    <option value="Monagas"></option>
+    <option value="Nueva Esparta"></option>
+    <option value="Portuguesa"></option>
+    <option value="Sucre"></option>
+    <option value="Táchira"></option>
+    <option value="Trujillo"></option>
+    <option value="La Guaira"></option>
+    <option value="Yaracuy"></option>
+    <option value="Zulia"></option>
+  </datalist>
 
   <script>
-    const GOOGLE_SHEETS_API_URL = "https://script.google.com/macros/s/AKfycbxWQrmcFE5a8k9_O1oZB7X4qkLwvB9O7d8Z529-90hxb5BiERmH_4Vk5WRo8ojQj0Y/exec";
+    const CONFIG = {
+      SHEET_URL: "https://script.google.com/macros/s/AKfycbwqA29_Ej3A6M88jH3k4c_XjC_fO6tD15O7M1s8S/exec",
+      DEFAULT_CENTER: [10.4806, -66.9036],
+      DEFAULT_ZOOM: 6
+    };
 
-    const FALLBACK_DATA = [
+    let map, markersCluster, recordsData = [], markersMap = new Map();
+    let selectedType = "TODOS";
+
+    const MOCK_DATA = [
       {
         TIPO: "CLIENTE",
-        NOMBRE: "Farmacia Altamira",
-        ZONA: "Altamira",
-        ESTADO: "Distrito Capital",
-        DIRECCION: "Av. Luis Roche, Altamira",
-        COORDENADAS: "10.5006, -66.8516",
-        TELEFONO: "+58 412 123 4567",
-        INSTAGRAM: "@farmaciaaltamira",
-        CORREO: "contacto@altamira.demo",
-        WEB: "https://example.com"
+        NOMBRE: "Farmacia Central",
+        ZONA: "Chacao",
+        ESTADO: "Miranda",
+        DIRECCION: "Av. Francisco de Miranda, Edif. Galipán",
+        COORDENADAS: "10.4910, -66.8520",
+        TELEFONO: "+58 412 111 2233",
+        INSTAGRAM: "@farmaciacentral",
+        CORREO: "contacto@farmaciacentral.ve",
+        WEB: "https://farmaciacentral.ve"
       },
       {
         TIPO: "COMPETENCIA",
-        NOMBRE: "Market Salud Chacao",
-        ZONA: "Chacao",
+        NOMBRE: "Distribuidora Médica del Este",
+        ZONA: "Las Mercedes",
         ESTADO: "Miranda",
-        DIRECCION: "Centro Chacao",
-        COORDENADAS: "10.4942, -66.8558",
-        TELEFONO: "+58 414 555 1200",
-        INSTAGRAM: "@marketsalud",
-        CORREO: "",
+        DIRECCION: "Calle Paris, Torre B",
+        COORDENADAS: "10.4800, -66.8600",
+        TELEFONO: "+58 414 999 8877",
+        INSTAGRAM: "@distribuidoramedica",
+        CORREO: "ventas@distribuidoramedica.com",
         WEB: ""
       },
       {
         TIPO: "CLIENTE",
-        NOMBRE: "Distribuidora Lago",
-        ZONA: "Maracaibo",
-        ESTADO: "Zulia",
-        DIRECCION: "Av. 5 de Julio",
-        COORDENADAS: "10.6500, -71.6333",
-        TELEFONO: "+58 424 987 3301",
-        INSTAGRAM: "",
-        CORREO: "ventas@lago.demo",
-        WEB: ""
+        NOMBRE: "Supermercado El Sol",
+        ZONA: "Valencia Centro",
+        ESTADO: "Carabobo",
+        DIRECCION: "Av. Bolívar Norte, Sector La Alegría",
+        COORDENADAS: "10.2200, -68.0050",
+        TELEFONO: "+58 416 333 4455",
+        INSTAGRAM: "@elsol_valencia",
+        CORREO: "info@elsol.com.ve",
+        WEB: "https://elsol.com.ve"
       }
     ];
 
-    const STATE_COORDS = {
-      "Amazonas": [5.6639, -67.6236],
-      "Anzoategui": [9.0797, -64.6667],
-      "Anzoátegui": [9.0797, -64.6667],
-      "Apure": [7.8940, -67.4731],
-      "Aragua": [10.2469, -67.5958],
-      "Barinas": [8.6226, -70.2075],
-      "Bolivar": [8.1292, -63.5409],
-      "Bolívar": [8.1292, -63.5409],
-      "Carabobo": [10.1620, -68.0077],
-      "Cojedes": [9.6580, -68.5827],
-      "Delta Amacuro": [9.0622, -62.0510],
-      "Distrito Capital": [10.5000, -66.9167],
-      "Falcon": [11.1811, -69.8597],
-      "Falcón": [11.1811, -69.8597],
-      "Guarico": [9.9115, -67.3538],
-      "Guárico": [9.9115, -67.3538],
-      "Lara": [10.0678, -69.3474],
-      "Merida": [8.5897, -71.1561],
-      "Mérida": [8.5897, -71.1561],
-      "Miranda": [10.2500, -66.4167],
-      "Monagas": [9.7457, -63.1832],
-      "Nueva Esparta": [10.9971, -63.9113],
-      "Portuguesa": [9.0944, -69.0970],
-      "Sucre": [10.4635, -64.1775],
-      "Tachira": [7.9137, -72.1416],
-      "Táchira": [7.9137, -72.1416],
-      "Trujillo": [9.3658, -70.4360],
-      "La Guaira": [10.6016, -66.9346],
-      "Vargas": [10.6016, -66.9346],
-      "Yaracuy": [10.3394, -68.7425],
-      "Zulia": [10.6500, -71.6333]
-    };
-
-    const app = {
-      map: null,
-      cluster: null,
-      records: [],
-      filtered: [],
-      markers: new Map(),
-      pageSize: 40,
-      renderedCount: 0,
-      filters: { q: "", type: "TODOS", state: "", zone: "" }
-    };
-
-    const $ = (selector) => document.querySelector(selector);
-    const listEl = $("#list");
-    const loadingOverlay = $("#loadingOverlay");
-    const sidebar = $("#sidebar");
-
-    function init() {
-      lucide.createIcons();
+    document.addEventListener("DOMContentLoaded", () => {
       initMap();
-      bindEvents();
-      fillStateDatalist();
-      loadRecords();
-    }
+      initEvents();
+      loadData();
+    });
 
     function initMap() {
-      app.map = L.map("map", {
-        zoomControl: false,
-        preferCanvas: true,
-        minZoom: 5,
-        maxBounds: L.latLngBounds([0.4, -74.8], [13.8, -58.2]),
-        maxBoundsViscosity: 0.75
-      }).setView([7.7, -66.2], 6);
+      map = L.map("map", { zoomControl: true }).setView(CONFIG.DEFAULT_CENTER, CONFIG.DEFAULT_ZOOM);
 
-      L.control.zoom({ position: "bottomright" }).addTo(app.map);
-      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-        maxZoom: 20
-      }).addTo(app.map);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
 
-      app.cluster = L.markerClusterGroup({
+      markersCluster = L.markerClusterGroup({
         showCoverageOnHover: false,
-        spiderfyOnMaxZoom: true,
-        spiderLegPolylineOptions: { weight: 2, color: "#0f172a", opacity: 0.55 },
-        zoomToBoundsOnClick: true,
-        removeOutsideVisibleBounds: true,
-        chunkedLoading: true,
-        chunkInterval: 160,
-        chunkDelay: 35,
-        maxClusterRadius: (zoom) => zoom >= 15 ? 18 : zoom >= 12 ? 30 : 48,
         iconCreateFunction: (cluster) => {
           const count = cluster.getChildCount();
-          const size = count >= 500 ? 66 : count >= 100 ? 56 : 48;
-          const level = count >= 500 ? "large" : count >= 100 ? "medium" : "small";
+          let cClass = "cluster-small";
+          if (count > 10) cClass = "cluster-medium";
+          if (count > 25) cClass = "cluster-large";
           return L.divIcon({
-            html: `<div><span>${formatCount(count)}</span></div>`,
-            className: `marker-cluster cluster-${level}`,
-            iconSize: L.point(size, size)
+            html: `<div><span>${count}</span></div>`,
+            className: `marker-cluster ${cClass}`,
+            iconSize: L.point(40, 40)
           });
         }
       });
 
-      app.map.addLayer(app.cluster);
+      map.addLayer(markersCluster);
     }
 
-    function bindEvents() {
-      $("#newRecordBtn").addEventListener("click", openModal);
-      $("#mobileNewBtn").addEventListener("click", openModal);
-      $("#closeModalBtn").addEventListener("click", closeModal);
-      $("#cancelBtn").addEventListener("click", closeModal);
-      $("#modal").addEventListener("click", (event) => {
-        if (event.target.id === "modal") closeModal();
+    function initEvents() {
+      document.getElementById("refreshBtn").addEventListener("click", loadData);
+      document.getElementById("fitBtn").addEventListener("click", fitBounds);
+      document.getElementById("newRecordBtn").addEventListener("click", openModal);
+      document.getElementById("mobileNewBtn").addEventListener("click", openModal);
+      document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+      document.getElementById("cancelBtn").addEventListener("click", closeModal);
+      document.getElementById("recordForm").addEventListener("submit", handleFormSubmit);
+
+      document.getElementById("searchInput").addEventListener("input", filterAndRender);
+      document.getElementById("stateFilter").addEventListener("change", filterAndRender);
+      document.getElementById("zoneFilter").addEventListener("change", filterAndRender);
+
+      document.querySelectorAll("#typeTabs button").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          document.querySelectorAll("#typeTabs button").forEach(b => b.classList.remove("is-active"));
+          e.target.classList.add("is-active");
+          selectedType = e.target.dataset.type;
+          filterAndRender();
+        });
       });
-      $("#recordForm").addEventListener("submit", saveRecord);
-      $("#refreshBtn").addEventListener("click", loadRecords);
-      $("#fitBtn").addEventListener("click", fitVisibleMarkers);
-      $("#sheetToggle").addEventListener("click", () => {
+
+      document.querySelectorAll("[data-stat-filter]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const targetType = btn.dataset.statFilter;
+          const tabBtn = document.querySelector(`#typeTabs button[data-type="${targetType}"]`);
+          if (tabBtn) tabBtn.click();
+        });
+      });
+
+      const sidebar = document.getElementById("sidebar");
+      document.getElementById("sheetToggle").addEventListener("click", () => {
         sidebar.classList.toggle("expanded");
-        setTimeout(() => app.map.invalidateSize(), 340);
-      });
-
-      ["searchInput", "stateFilter", "zoneFilter"].forEach((id) => {
-        $(`#${id}`).addEventListener("focus", expandMobileSheet);
-        $(`#${id}`).addEventListener("click", expandMobileSheet);
-      });
-
-      $("#searchInput").addEventListener("input", (event) => {
-        app.filters.q = event.target.value.trim().toLowerCase();
-        applyFilters(true);
-      });
-
-      $("#stateFilter").addEventListener("change", (event) => {
-        app.filters.state = event.target.value;
-        rebuildZoneFilter();
-        applyFilters(true);
-      });
-
-      $("#zoneFilter").addEventListener("change", (event) => {
-        app.filters.zone = event.target.value;
-        applyFilters(true);
-      });
-
-      document.querySelectorAll(".type-tab").forEach((button) => {
-        button.addEventListener("click", () => {
-          expandMobileSheet();
-          setTypeFilter(button.dataset.type);
-        });
-      });
-
-      document.querySelectorAll(".stat-card").forEach((button) => {
-        button.addEventListener("click", () => setTypeFilter(button.dataset.statFilter));
-      });
-
-      listEl.addEventListener("scroll", () => {
-        const nearBottom = listEl.scrollTop + listEl.clientHeight >= listEl.scrollHeight - 220;
-        if (nearBottom) renderMoreCards();
       });
     }
 
-    async function loadRecords() {
+    async function loadData() {
       showLoading(true);
-      app.markers.clear();
-      app.cluster.clearLayers();
-      listEl.innerHTML = renderSkeletonCards();
-
       try {
-        let data;
-        if (!isConfiguredApi()) {
-          data = FALLBACK_DATA;
-          showToast("Usando datos demo. Configura GOOGLE_SHEETS_API_URL para conectar Sheets.", "info");
-        } else {
-          const response = await fetch(GOOGLE_SHEETS_API_URL, { method: "GET" });
-          if (!response.ok) throw new Error("No se pudo leer Google Sheets");
-          const payload = await response.json();
-          data = Array.isArray(payload) ? payload : (payload.data || payload.records || []);
-        }
-
-        app.records = await normalizeRecords(data);
-        rebuildFilters();
-        applyFilters(false);
-        fitVisibleMarkers();
-      } catch (error) {
-        console.error(error);
-        app.records = await normalizeRecords(FALLBACK_DATA);
-        rebuildFilters();
-        applyFilters(false);
-        fitVisibleMarkers();
-        showToast("No se pudo conectar. Mostrando datos demo.", "error");
+        const response = await fetch(CONFIG.SHEET_URL);
+        if (!response.ok) throw new Error("Error de red");
+        const data = await response.json();
+        recordsData = Array.isArray(data) && data.length > 0 ? data : MOCK_DATA;
+      } catch (err) {
+        console.warn("No se pudo cargar desde Apps Script, utilizando datos de prueba.", err);
+        recordsData = MOCK_DATA;
       } finally {
+        populateFilterDropdowns();
+        filterAndRender();
         showLoading(false);
+        if (window.lucide) lucide.createIcons();
       }
     }
 
-    async function normalizeRecords(records) {
-      const cleaned = [];
-      for (const raw of records) {
-        const record = {};
-        ["TIPO", "NOMBRE", "ZONA", "ESTADO", "DIRECCION", "COORDENADAS", "TELEFONO", "INSTAGRAM", "CORREO", "WEB"].forEach((key) => {
-          record[key] = String(raw[key] ?? "").trim();
-        });
+    function populateFilterDropdowns() {
+      const stateSelect = document.getElementById("stateFilter");
+      const zoneSelect = document.getElementById("zoneFilter");
 
-        record.TIPO = normalizeType(record.TIPO);
-        const parsed = parseCoordinates(record.COORDENADAS);
-        if (parsed) {
-          record.lat = parsed[0];
-          record.lng = parsed[1];
-          record.coordSource = "sheet";
-        } else {
-          const geo = await geocodeRecord(record);
-          record.lat = geo[0];
-          record.lng = geo[1];
-          record.coordSource = geo[2];
-        }
-        record.id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
-        cleaned.push(record);
-      }
-      return cleaned;
+      const states = [...new Set(recordsData.map(r => r.ESTADO).filter(Boolean))].sort();
+      const zones = [...new Set(recordsData.map(r => r.ZONA).filter(Boolean))].sort();
+
+      stateSelect.innerHTML = '<option value="">Todos</option>' + states.map(s => `<option value="${s}">${s}</option>`).join("");
+      zoneSelect.innerHTML = '<option value="">Todas</option>' + zones.map(z => `<option value="${z}">${z}</option>`).join("");
     }
 
-    function normalizeType(value) {
-      const upper = removeAccents(value).toUpperCase();
-      return upper.includes("COMP") ? "COMPETENCIA" : "CLIENTE";
-    }
+    function filterAndRender() {
+      const search = document.getElementById("searchInput").value.toLowerCase().trim();
+      const state = document.getElementById("stateFilter").value;
+      const zone = document.getElementById("zoneFilter").value;
 
-    function parseCoordinates(value) {
-      if (!value) return null;
-      const match = value.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
-      if (!match) return null;
-      const lat = Number(match[1]);
-      const lng = Number(match[2]);
-      if (Number.isFinite(lat) && Number.isFinite(lng)) return [lat, lng];
-      return null;
-    }
+      const filtered = recordsData.filter(item => {
+        const matchType = selectedType === "TODOS" || (item.TIPO || "").toUpperCase() === selectedType;
+        const matchState = !state || item.ESTADO === state;
+        const matchZone = !zone || item.ZONA === zone;
+        const matchSearch = !search ||
+          (item.NOMBRE || "").toLowerCase().includes(search) ||
+          (item.DIRECCION || "").toLowerCase().includes(search) ||
+          (item.ZONA || "").toLowerCase().includes(search);
 
-    async function geocodeRecord(record) {
-      const fallback = findStateCoords(record.ESTADO);
-      const query = [record.DIRECCION, record.ZONA, record.ESTADO, "Venezuela"].filter(Boolean).join(", ");
-
-      if (query.length > 12) {
-        try {
-          const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ve&q=${encodeURIComponent(query)}`;
-          const response = await fetch(url, { headers: { "Accept": "application/json" } });
-          if (response.ok) {
-            const data = await response.json();
-            if (data[0]?.lat && data[0]?.lon) return [Number(data[0].lat), Number(data[0].lon), "nominatim"];
-          }
-        } catch (error) {
-          console.warn("Nominatim fallback:", error);
-        }
-      }
-
-      return [...fallback, "estado"];
-    }
-
-    function findStateCoords(state) {
-      const clean = removeAccents(state).toLowerCase();
-      const entry = Object.entries(STATE_COORDS).find(([name]) => removeAccents(name).toLowerCase() === clean);
-      return entry ? entry[1] : [8.3, -66.6];
-    }
-
-    function rebuildFilters() {
-      const states = uniqueSorted(app.records.map((record) => record.ESTADO));
-      fillSelect($("#stateFilter"), states, "Todos");
-      rebuildZoneFilter();
-      updateStats();
-    }
-
-    function rebuildZoneFilter() {
-      const zones = uniqueSorted(app.records
-        .filter((record) => !app.filters.state || record.ESTADO === app.filters.state)
-        .map((record) => record.ZONA));
-      fillSelect($("#zoneFilter"), zones, "Todas");
-      if (app.filters.zone && !zones.includes(app.filters.zone)) app.filters.zone = "";
-      $("#zoneFilter").value = app.filters.zone;
-    }
-
-    function fillStateDatalist() {
-      $("#venezuelaStates").innerHTML = Object.keys(STATE_COORDS)
-        .filter((name, index, arr) => arr.indexOf(name) === index)
-        .sort((a, b) => a.localeCompare(b, "es"))
-        .map((name) => `<option value="${escapeHtml(name)}"></option>`)
-        .join("");
-    }
-
-    function fillSelect(select, values, allLabel) {
-      const previous = select.value;
-      select.innerHTML = `<option value="">${allLabel}</option>` + values.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
-      select.value = values.includes(previous) ? previous : "";
-    }
-
-    function setTypeFilter(type) {
-      app.filters.type = type;
-      document.querySelectorAll(".type-tab").forEach((button) => {
-        const active = button.dataset.type === type;
-        button.className = active
-          ? "type-tab is-active rounded-md px-2 py-2 text-xs font-bold transition"
-          : "type-tab rounded-md px-2 py-2 text-xs font-bold transition hover:bg-white/5";
-      });
-      applyFilters(true);
-    }
-
-    function applyFilters(animate) {
-      const q = app.filters.q;
-      app.filtered = app.records.filter((record) => {
-        const text = `${record.NOMBRE} ${record.DIRECCION} ${record.ZONA}`.toLowerCase();
-        const matchText = !q || removeAccents(text).includes(removeAccents(q));
-        const matchType = app.filters.type === "TODOS" || record.TIPO === app.filters.type;
-        const matchState = !app.filters.state || record.ESTADO === app.filters.state;
-        const matchZone = !app.filters.zone || record.ZONA === app.filters.zone;
-        return matchText && matchType && matchState && matchZone;
+        return matchType && matchState && matchZone && matchSearch;
       });
 
-      updateStats();
-      renderMarkers();
-      renderCards(true);
-      $("#visibleCount").textContent = app.filtered.length;
-
-      if (animate && window.gsap) {
-        gsap.fromTo(".record-card", { opacity: 0, y: 8 }, { opacity: 1, y: 0, stagger: 0.025, duration: 0.28, ease: "power2.out" });
-      }
+      renderStats();
+      renderList(filtered);
+      renderMapMarkers(filtered);
     }
 
-    function updateStats() {
-      $("#totalCount").textContent = app.records.length;
-      $("#clientCount").textContent = app.records.filter((record) => record.TIPO === "CLIENTE").length;
-      $("#competitionCount").textContent = app.records.filter((record) => record.TIPO === "COMPETENCIA").length;
+    function renderStats() {
+      const total = recordsData.length;
+      const clients = recordsData.filter(r => (r.TIPO || "").toUpperCase() === "CLIENTE").length;
+      const competition = recordsData.filter(r => (r.TIPO || "").toUpperCase() === "COMPETENCIA").length;
+
+      document.getElementById("totalCount").textContent = total;
+      document.getElementById("clientCount").textContent = clients;
+      document.getElementById("competitionCount").textContent = competition;
     }
 
-    function renderMarkers() {
-      app.cluster.clearLayers();
-      app.markers.clear();
-      app.filtered.forEach((record) => {
-        const marker = L.marker([record.lat, record.lng], { icon: makeIcon(record.TIPO) });
-        marker.bindPopup(makePopup(record), { closeButton: true, offset: [0, -4] });
-        marker.on("click", () => highlightCard(record.id));
-        app.markers.set(record.id, marker);
-        app.cluster.addLayer(marker);
-      });
-    }
+    function renderList(data) {
+      const listEl = document.getElementById("list");
+      document.getElementById("visibleCount").textContent = data.length;
 
-    function makeIcon(type) {
-      const isClient = type === "CLIENTE";
-      const iconName = isClient ? "store" : "swords";
-      return L.divIcon({
-        className: "marker-icon",
-        html: `<div class="custom-marker ${isClient ? "marker-client" : "marker-competition"}"><i data-lucide="${iconName}"></i></div>`,
-        iconSize: [34, 34],
-        iconAnchor: [17, 17],
-        popupAnchor: [0, -18]
-      });
-    }
-
-    function makePopup(record) {
-      const isClient = record.TIPO === "CLIENTE";
-      return `
-        <article class="contact-popup">
-          <div class="mb-3 flex items-start justify-between gap-3">
-            <div>
-              <span class="rounded-full ${isClient ? "badge-client" : "badge-competition"} px-2.5 py-1 text-[11px] font-extrabold">${record.TIPO}</span>
-              <h3 class="popup-title">${escapeHtml(record.NOMBRE || "Sin nombre")}</h3>
-            </div>
-          </div>
-          <div class="popup-details">
-            <p><b class="text-slate-100">Estado:</b> ${escapeHtml(record.ESTADO || "N/D")}</p>
-            <p><b class="text-slate-100">Zona:</b> ${escapeHtml(record.ZONA || "N/D")}</p>
-            <p><b class="text-slate-100">Teléfono:</b> ${escapeHtml(record.TELEFONO || "N/D")}</p>
-          </div>
-          <div class="popup-actions">
-            ${record.TELEFONO ? popupLink(whatsAppUrl(record.TELEFONO), "WhatsApp", "message-circle", "emerald") : ""}
-            ${record.INSTAGRAM ? popupLink(instagramUrl(record.INSTAGRAM), "Instagram", "instagram", "pink") : ""}
-            ${record.WEB ? popupLink(normalizeUrl(record.WEB), "Web", "globe", "cyan") : ""}
-          </div>
-        </article>
-      `;
-    }
-
-    function popupLink(href, label, icon, tone) {
-      const tones = {
-        emerald: "popup-whatsapp",
-        pink: "popup-instagram",
-        cyan: "popup-web"
-      };
-      return `<a target="_blank" rel="noopener" class="popup-action ${tones[tone]}" href="${href}"><i data-lucide="${icon}"></i><span>${label}</span></a>`;
-    }
-
-    function renderCards(reset) {
-      if (reset) {
-        app.renderedCount = 0;
-        listEl.innerHTML = "";
-      }
-      renderMoreCards();
-    }
-
-    function renderMoreCards() {
-      const next = app.filtered.slice(app.renderedCount, app.renderedCount + app.pageSize);
-      if (!next.length && app.renderedCount === 0) {
-        listEl.innerHTML = `
-          <div class="rounded-lg border border-slate-200/10 bg-white/[0.045] p-5 text-center">
-            <i data-lucide="map-pin-off" class="mx-auto mb-3 h-8 w-8 text-slate-400"></i>
-            <p class="font-semibold text-slate-200">No hay registros visibles</p>
-            <p class="mt-1 text-sm text-slate-400">Prueba con otros filtros.</p>
-          </div>`;
-        lucide.createIcons();
+      if (data.length === 0) {
+        listEl.innerHTML = `<div class="p-6 text-center text-sm text-slate-400">No se encontraron registros.</div>`;
         return;
       }
 
-      const fragment = document.createDocumentFragment();
-      next.forEach((record) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.dataset.id = record.id;
-        button.className = "record-card w-full rounded-lg border border-slate-200/10 bg-white/[0.045] p-4 text-left";
-        button.innerHTML = makeCard(record);
-        button.addEventListener("click", () => selectRecord(record.id));
-        fragment.appendChild(button);
-      });
-      listEl.appendChild(fragment);
-      app.renderedCount += next.length;
-      lucide.createIcons();
+      listEl.innerHTML = data.map((item, index) => {
+        const isClient = (item.TIPO || "").toUpperCase() === "CLIENTE";
+        const iconBg = isClient ? "record-icon-client" : "record-icon-competition";
+        const badgeBg = isClient ? "badge-client" : "badge-competition";
+
+        return `
+          <div class="record-card cursor-pointer rounded-lg border p-3.5 transition" onclick="focusRecord(${index})">
+            <div class="flex items-start gap-3">
+              <div class="${iconBg} flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border font-bold">
+                <i data-lucide="${isClient ? 'user-check' : 'building-2'}" class="h-5 w-5"></i>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-2">
+                  <h3 class="record-title truncate text-sm font-bold text-slate-900">${item.NOMBRE || "Sin Nombre"}</h3>
+                  <span class="${badgeBg} rounded px-1.5 py-0.5 text-[10px] font-extrabold uppercase text-white">${item.TIPO}</span>
+                </div>
+                <p class="record-meta mt-1 truncate text-xs text-slate-600">${item.ZONA || ""}, ${item.ESTADO || ""}</p>
+                <p class="record-subtle mt-0.5 truncate text-xs text-slate-500">${item.DIRECCION || ""}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      if (window.lucide) lucide.createIcons();
     }
 
-    function makeCard(record) {
-      const isClient = record.TIPO === "CLIENTE";
-      const tone = isClient ? "record-icon-client" : "record-icon-competition";
-      const badge = isClient ? "badge-client" : "badge-competition";
+    function renderMapMarkers(data) {
+      markersCluster.clearLayers();
+      markersMap.clear();
+
+      data.forEach((item, index) => {
+        const coords = parseCoords(item.COORDENADAS);
+        if (!coords) return;
+
+        const isClient = (item.TIPO || "").toUpperCase() === "CLIENTE";
+        const markerClass = isClient ? "marker-client" : "marker-competition";
+        const iconName = isClient ? "user-check" : "building-2";
+
+        const customIcon = L.divIcon({
+          className: "custom-marker-wrap",
+          html: `
+            <div class="custom-marker ${markerClass}">
+              <span class="marker-icon"><i data-lucide="${iconName}"></i></span>
+            </div>
+          `,
+          iconSize: [34, 34],
+          iconAnchor: [17, 17]
+        });
+
+        const marker = L.marker(coords, { icon: customIcon });
+        marker.bindPopup(createPopupContent(item));
+
+        markersCluster.addLayer(marker);
+        markersMap.set(index, { marker, coords });
+      });
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function parseCoords(coordStr) {
+      if (!coordStr) return null;
+      const parts = coordStr.split(",").map(p => parseFloat(p.trim()));
+      if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        return [parts[0], parts[1]];
+      }
+      return null;
+    }
+
+    function createPopupContent(item) {
+      const isClient = (item.TIPO || "").toUpperCase() === "CLIENTE";
+      const badgeClass = isClient ? "badge-client" : "badge-competition";
+      const cleanPhone = (item.TELEFONO || "").replace(/\D/g, "");
+
+      let actionsHtml = "";
+      if (item.TELEFONO) {
+        actionsHtml += `<a href="https://wa.me/${cleanPhone}" target="_blank" class="popup-action popup-whatsapp"><i data-lucide="message-circle"></i> WhatsApp</a>`;
+      }
+      if (item.INSTAGRAM) {
+        const handle = item.INSTAGRAM.replace("@", "");
+        actionsHtml += `<a href="https://instagram.com/${handle}" target="_blank" class="popup-action popup-instagram"><i data-lucide="instagram"></i> Instagram</a>`;
+      }
+      if (item.WEB) {
+        actionsHtml += `<a href="${item.WEB}" target="_blank" class="popup-action popup-web"><i data-lucide="globe"></i> Sitio Web</a>`;
+      }
+
       return `
-        <div class="flex items-start gap-3">
-          <span class="grid h-10 w-10 flex-none place-items-center rounded-lg ${tone} border">
-            <i data-lucide="${isClient ? "store" : "swords"}" class="h-5 w-5"></i>
-          </span>
-          <span class="min-w-0 flex-1">
-            <span class="flex items-center justify-between gap-2">
-              <strong class="record-title truncate text-sm">${escapeHtml(record.NOMBRE || "Sin nombre")}</strong>
-              <span class="rounded-full ${badge} px-2 py-1 text-[10px] font-extrabold">${record.TIPO}</span>
-            </span>
-            <span class="record-subtle mt-1 block truncate text-xs">${escapeHtml(record.DIRECCION || "Sin dirección")}</span>
-            <span class="record-meta mt-3 flex flex-wrap items-center gap-2 text-[11px]">
-              <span class="flex items-center gap-1"><i data-lucide="map-pin" class="h-3.5 w-3.5"></i>${escapeHtml(record.ESTADO || "N/D")}</span>
-              <span class="flex items-center gap-1"><i data-lucide="navigation" class="h-3.5 w-3.5"></i>${escapeHtml(record.ZONA || "N/D")}</span>
-            </span>
-          </span>
+        <div class="contact-popup">
+          <span class="${badgeClass} rounded px-2 py-0.5 text-[10px] font-extrabold uppercase text-white">${item.TIPO}</span>
+          <h2 class="popup-title">${item.NOMBRE || "Sin Nombre"}</h2>
+          <div class="popup-details">
+            <div><b>Ubicación:</b> ${item.ZONA || ""}, ${item.ESTADO || ""}</div>
+            <div><b>Dirección:</b> ${item.DIRECCION || "No especificada"}</div>
+            ${item.TELEFONO ? `<div><b>Teléfono:</b> ${item.TELEFONO}</div>` : ""}
+            ${item.CORREO ? `<div><b>Correo:</b> ${item.CORREO}</div>` : ""}
+          </div>
+          ${actionsHtml ? `<div class="popup-actions">${actionsHtml}</div>` : ""}
         </div>
       `;
     }
 
-    function selectRecord(id) {
-      const record = app.filtered.find((item) => item.id === id);
-      const marker = app.markers.get(id);
-      if (!record || !marker) return;
-      const isMobile = window.matchMedia("(max-width: 900px)").matches;
-      app.map.flyTo([record.lat, record.lng], Math.max(app.map.getZoom(), 14), { animate: true, duration: 1.15 });
-      setTimeout(() => {
-        marker.openPopup();
-        lucide.createIcons();
-      }, 650);
-      highlightCard(id);
-      if (isMobile) sidebar.classList.remove("expanded");
-    }
-
-    function expandMobileSheet() {
-      if (window.matchMedia("(max-width: 900px)").matches) {
-        sidebar.classList.add("expanded");
-        setTimeout(() => app.map.invalidateSize(), 340);
+    function focusRecord(index) {
+      const item = markersMap.get(index);
+      if (item) {
+        map.setView(item.coords, 14);
+        item.marker.openPopup();
+        if (window.innerWidth <= 900) {
+          document.getElementById("sidebar").classList.remove("expanded");
+        }
+      } else {
+        showToast("Registro sin coordenadas válidas para mostrar en mapa");
       }
     }
 
-    function highlightCard(id) {
-      document.querySelectorAll(".record-card").forEach((card) => {
-        const active = card.dataset.id === id;
-        card.classList.toggle("border-cyan-300/60", active);
-        card.classList.toggle("bg-cyan-300/10", active);
-        if (active) card.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      });
-    }
-
-    async function saveRecord(event) {
-      event.preventDefault();
-      const form = event.currentTarget;
-      const saveBtn = $("#saveBtn");
-      const formData = new FormData(form);
-      const payload = Object.fromEntries(formData.entries());
-      payload.TIPO = normalizeType(payload.TIPO);
-
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = `<span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-950/30 border-t-slate-950"></span> Guardando`;
-
-      try {
-        if (isConfiguredApi()) {
-          const response = await fetch(GOOGLE_SHEETS_API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-          if (!response.ok) throw new Error("No se pudo guardar");
-        }
-
-        const [record] = await normalizeRecords([payload]);
-        app.records.unshift(record);
-        form.reset();
-        closeModal();
-        rebuildFilters();
-        applyFilters(true);
-        selectRecord(record.id);
-        showToast("Registro guardado y agregado al mapa.", "success");
-      } catch (error) {
-        console.error(error);
-        showToast("No se pudo guardar el registro.", "error");
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = `<i data-lucide="save" class="h-4 w-4"></i> Guardar`;
-        lucide.createIcons();
+    function fitBounds() {
+      if (markersCluster.getLayers().length > 0) {
+        map.fitBounds(markersCluster.getBounds(), { padding: [50, 50] });
+      } else {
+        map.setView(CONFIG.DEFAULT_CENTER, CONFIG.DEFAULT_ZOOM);
       }
     }
 
     function openModal() {
-      $("#modal").classList.add("open");
-      setTimeout(() => document.querySelector("[name='NOMBRE']").focus(), 120);
-      if (window.gsap) gsap.fromTo(".form-input", { opacity: 0, y: 8 }, { opacity: 1, y: 0, stagger: 0.025, duration: .24, ease: "power2.out" });
+      document.getElementById("modal").classList.add("open");
     }
 
     function closeModal() {
-      $("#modal").classList.remove("open");
+      document.getElementById("modal").classList.remove("open");
+      document.getElementById("recordForm").reset();
     }
 
-    function fitVisibleMarkers() {
-      const markers = Array.from(app.markers.values());
-      if (!markers.length) return app.map.flyTo([7.7, -66.2], 6, { duration: .9 });
-      const group = L.featureGroup(markers);
-      app.map.fitBounds(group.getBounds().pad(0.18), { animate: true, duration: 1, maxZoom: 14 });
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      const saveBtn = document.getElementById("saveBtn");
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Guardando...";
+
+      try {
+        await fetch(CONFIG.SHEET_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        recordsData.unshift(data);
+        filterAndRender();
+        closeModal();
+        showToast("Registro guardado con éxito");
+      } catch (err) {
+        showToast("Error al guardar el registro");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<i data-lucide="check" class="h-4 w-4"></i> Guardar Registro`;
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      document.getElementById("toastText").textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
     }
 
     function showLoading(show) {
-      loadingOverlay.style.display = show ? "grid" : "none";
+      document.getElementById("loadingOverlay").style.display = show ? "grid" : "none";
     }
-
-    function showToast(message, type = "success") {
-      const toast = $("#toast");
-      const icon = type === "error" ? "alert-triangle" : type === "info" ? "info" : "check-circle-2";
-      const color = type === "error" ? "text-rose-300" : type === "info" ? "text-cyan-300" : "text-emerald-300";
-      $("#toastText").textContent = message;
-      toast.querySelector("i").setAttribute("data-lucide", icon);
-      toast.querySelector("i").className = `h-5 w-5 ${color}`;
-      lucide.createIcons();
-      toast.classList.add("show");
-      clearTimeout(showToast.timer);
-      showToast.timer = setTimeout(() => toast.classList.remove("show"), 3400);
-    }
-
-    function renderSkeletonCards() {
-      return Array.from({ length: 5 }).map(() => `
-        <div class="rounded-lg border border-slate-200/10 bg-white/[0.045] p-4">
-          <div class="flex gap-3">
-            <div class="skeleton h-10 w-10 rounded-lg"></div>
-            <div class="flex-1 space-y-2">
-              <div class="skeleton h-4 w-3/4 rounded"></div>
-              <div class="skeleton h-3 w-full rounded"></div>
-              <div class="skeleton h-3 w-1/2 rounded"></div>
-            </div>
-          </div>
-        </div>
-      `).join("");
-    }
-
-    function uniqueSorted(values) {
-      return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
-    }
-
-    function formatCount(value) {
-      if (value >= 1000) {
-        return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k`;
-      }
-      return String(value);
-    }
-
-    function isConfiguredApi() {
-      return GOOGLE_SHEETS_API_URL && !GOOGLE_SHEETS_API_URL.includes("TU_URL_DE_APPS_SCRIPT");
-    }
-
-    function whatsAppUrl(phone) {
-      const clean = phone.replace(/[^\d]/g, "");
-      return `https://wa.me/${clean}`;
-    }
-
-    function instagramUrl(value) {
-      const clean = value.replace(/^@/, "").replace(/^https?:\/\/(www\.)?instagram\.com\//, "").replace(/\/$/, "");
-      return `https://instagram.com/${clean}`;
-    }
-
-    function normalizeUrl(value) {
-      return /^https?:\/\//i.test(value) ? value : `https://${value}`;
-    }
-
-    function removeAccents(value) {
-      return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    }
-
-    function escapeHtml(value) {
-      return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    window.addEventListener("load", init);
-    window.addEventListener("resize", () => setTimeout(() => app.map?.invalidateSize(), 120));
   </script>
 </body>
 </html>
