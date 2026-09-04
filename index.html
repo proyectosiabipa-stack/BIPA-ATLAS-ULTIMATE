@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoClientes Venezuela</title>
+  <meta name="description" content="Mapa interactivo para visualizar clientes y competencia en Venezuela conectado a Google Sheets." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "sans-serif"],
+            display: ["Plus Jakarta Sans", "Inter", "sans-serif"]
+          },
+          colors: {
+            ink: "#070a12",
+            glass: "rgba(15, 23, 42, 0.68)"
+          },
+          boxShadow: {
+            glow: "0 0 36px rgba(45, 212, 191, 0.18)",
+            dangerGlow: "0 0 36px rgba(251, 113, 133, 0.18)"
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --panel: rgba(255, 255, 255, 0.96);
+      --line: rgba(15, 23, 42, 0.18);
+      --muted: #475569;
+      --emerald: #059669;
+      --cyan: #0891b2;
+      --rose: #e11d48;
+      --orange: #ea580c;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 18% 10%, rgba(14, 116, 144, 0.18), transparent 30%),
+        radial-gradient(circle at 84% 16%, rgba(15, 118, 110, 0.14), transparent 28%),
+        linear-gradient(135deg, #d8e3ee 0%, #eef4f8 46%, #dbe7ef 100%);
+      color: #0f172a;
+      font-family: Inter, sans-serif;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    .app-shell {
+      height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(390px, 430px) 1fr;
+      padding: 14px;
+      gap: 14px;
+    }
+
+    .glass-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .sidebar {
+      position: relative;
+      z-index: 20;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .map-wrap {
+      position: relative;
+      min-width: 0;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.20);
+      background: #dbeafe;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+      min-height: 360px;
+      background: #dbeafe;
+    }
+
+    .leaflet-control-zoom a {
+      background: rgba(255, 255, 255, 0.92) !important;
+      color: #0f172a !important;
+      border-color: rgba(15, 23, 42, 0.12) !important;
+    }
+
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+      background: rgba(255, 255, 255, 0.96);
+      color: #0f172a;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      box-shadow: 0 22px 56px rgba(15, 23, 42, 0.18);
+      backdrop-filter: blur(16px);
+    }
+
+    .leaflet-popup-content { margin: 0; width: 330px !important; }
+    .leaflet-popup-close-button { color: #334155 !important; }
+
+    .custom-marker {
+      position: relative;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.34);
+    }
+
+    .custom-marker::before,
+    .custom-marker::after {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: inherit;
+      background: currentColor;
+      opacity: 0.22;
+      animation: markerPing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+      z-index: -1;
+    }
+
+    .custom-marker::after {
+      inset: -14px;
+      animation-delay: .55s;
+      opacity: .12;
+    }
+
+    .marker-client {
+      color: rgba(52, 211, 153, 0.7);
+      background: linear-gradient(135deg, #059669, #0284c7);
+    }
+
+    .marker-competition {
+      color: rgba(251, 113, 133, 0.72);
+      background: linear-gradient(135deg, #e11d48, #ea580c);
+    }
+
+    .marker-icon svg {
+      width: 17px;
+      height: 17px;
+      color: #ffffff;
+      stroke-width: 2.6;
+    }
+
+    @keyframes markerPing {
+      0% { transform: scale(.65); opacity: .32; }
+      70%, 100% { transform: scale(1.75); opacity: 0; }
+    }
+
+    .marker-cluster div {
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 42px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(5, 150, 105, .96), rgba(2, 132, 199, .96));
+      border: 2px solid rgba(255, 255, 255, .9);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, .24), 0 0 0 6px rgba(8, 145, 178, .18);
+      text-shadow: 0 1px 2px rgba(15, 23, 42, .28);
+    }
+
+    .marker-cluster-small,
+    .marker-cluster-medium,
+    .marker-cluster-large {
+      background: rgba(255, 255, 255, .52);
+      border: 1px solid rgba(8, 145, 178, .28);
+      backdrop-filter: blur(10px);
+    }
+
+    .cluster-small div {
+      width: 42px;
+      height: 42px;
+      line-height: 38px;
+      background: linear-gradient(135deg, #0f766e, #0284c7);
+    }
+
+    .cluster-medium div {
+      width: 50px;
+      height: 50px;
+      line-height: 46px;
+      font-size: 15px;
+      background: linear-gradient(135deg, #0369a1, #4338ca);
+      box-shadow: 0 14px 30px rgba(30, 64, 175, .26), 0 0 0 7px rgba(67, 56, 202, .16);
+    }
+
+    .cluster-large div {
+      width: 60px;
+      height: 60px;
+      line-height: 56px;
+      font-size: 16px;
+      background: linear-gradient(135deg, #7f1d1d, #be123c);
+      box-shadow: 0 16px 34px rgba(190, 18, 60, .28), 0 0 0 8px rgba(190, 18, 60, .14);
+    }
+
+    .scroll-area {
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, .35) transparent;
+    }
+
+    .scroll-area::-webkit-scrollbar { width: 8px; }
+    .scroll-area::-webkit-scrollbar-track { background: transparent; }
+    .scroll-area::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, .28);
+      border-radius: 99px;
+    }
+
+    .record-card {
+      transform: translateY(0);
+      transition: transform .25s ease, border-color .25s ease, background .25s ease, box-shadow .25s ease;
+    }
+
+    .record-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(34, 211, 238, .34);
+      background: rgba(255, 255, 255, .98);
+      box-shadow: 0 18px 38px rgba(15, 23, 42, .18);
+    }
+
+    .sheet-handle { display: none; }
+
+    .skeleton {
+      position: relative;
+      overflow: hidden;
+      background: rgba(148, 163, 184, .12);
+    }
+
+    .skeleton::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
+      animation: shimmer 1.25s infinite;
+    }
+
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+
+    .modal-backdrop {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      transform: translateY(18px) scale(.98);
+      opacity: 0;
+      transition: transform .28s ease, opacity .28s ease;
+    }
+
+    .modal-backdrop.open .modal-card {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .toast {
+      transform: translateY(-14px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform .25s ease, opacity .25s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 900px) {
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
+      }
+
+      .app-shell {
+        display: block;
+        padding: 0;
+        height: 100dvh;
+      }
+
+      .map-wrap {
+        height: 100dvh;
+        border-radius: 0;
+        border: 0;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 650;
+        height: min(82dvh, 720px);
+        border-radius: 18px 18px 0 0;
+        transform: translateY(calc(100% - 132px));
+        transition: transform .34s cubic-bezier(.22, 1, .36, 1);
+        box-shadow: 0 -18px 60px rgba(15, 23, 42, .18);
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+
+      .sidebar.expanded { transform: translateY(0); }
+
+      .sheet-handle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 30px;
+        flex: 0 0 auto;
+        touch-action: manipulation;
+      }
+
+      .sheet-handle::before {
+        content: "";
+        width: 54px;
+        height: 5px;
+        border-radius: 999px;
+        background: rgba(71, 85, 105, .34);
+      }
+
+      .mobile-map-top {
+        display: flex !important;
+        top: calc(12px + env(safe-area-inset-top));
+        left: 12px;
+        right: 12px;
+      }
+
+      .leaflet-control-zoom {
+        margin-bottom: 150px !important;
+      }
+
+      .sidebar header {
+        padding: 0 16px 12px !important;
+      }
+
+      .sidebar header .mb-4 {
+        margin-bottom: 10px !important;
+      }
+
+      .sidebar h1 {
+        font-size: 20px !important;
+        line-height: 1.15 !important;
+      }
+
+      .sidebar header p {
+        display: none;
+      }
+
+      #newRecordBtn {
+        display: none;
+      }
+
+      .sidebar > section {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+      }
+
+      .sidebar > section:nth-of-type(1) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+      }
+
+      .stat-card {
+        min-height: 66px;
+        padding: 10px !important;
+      }
+
+      .stat-card strong {
+        font-size: 22px !important;
+      }
+
+      #typeTabs {
+        gap: 6px;
+      }
+
+      .type-tab,
+      #fitBtn,
+      #refreshBtn {
+        min-height: 44px;
+      }
+
+      #searchInput,
+      #stateFilter,
+      #zoneFilter {
+        min-height: 46px;
+        font-size: 16px;
+      }
+
+      .record-card {
+        padding: 14px !important;
+      }
+
+      #list {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
+      }
+
+      .modal-backdrop {
+        align-items: end;
+        padding: 0;
+      }
+
+      .modal-card {
+        width: 100%;
+        max-width: none;
+        max-height: 94dvh;
+        border-radius: 18px 18px 0 0;
+      }
+
+      .modal-card .scroll-area {
+        max-height: calc(94dvh - 148px) !important;
+      }
+
+      .modal-card input,
+      .modal-card select {
+        min-height: 48px;
+        font-size: 16px;
+      }
+
+      #toast {
+        left: 12px;
+        right: 12px;
+        top: calc(12px + env(safe-area-inset-top));
+      }
+    }
+
+    @media (max-width: 430px) {
+      .sidebar {
+        height: 84dvh;
+        transform: translateY(calc(100% - 126px));
+      }
+
+      .sidebar > section:nth-of-type(2) .grid.grid-cols-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-card span {
+        font-size: 11px !important;
+      }
+    }
+  </style>
+  <style>
+    .light-ui,
+    .light-ui .sidebar,
+    .light-ui .modal-card {
+      color: #0f172a;
+    }
+
+    .light-ui .sidebar .text-white,
+    .light-ui .modal-card .text-white,
+    .light-ui .sidebar .text-slate-100,
+    .light-ui .modal-card .text-slate-100 {
+      color: #0f172a !important;
+    }
+
+    .light-ui .sidebar .text-slate-200,
+    .light-ui .modal-card .text-slate-200 {
+      color: #1e293b !important;
+    }
+
+    .light-ui .sidebar .text-slate-300,
+    .light-ui .modal-card .text-slate-300 {
+      color: #334155 !important;
+    }
+
+    .light-ui .sidebar .text-slate-400,
+    .light-ui .modal-card .text-slate-400,
+    .light-ui .sidebar .text-slate-500,
+    .light-ui .modal-card .text-slate-500 {
+      color: #475569 !important;
+    }
+
+    .light-ui .sidebar .bg-white\/\[0\.045\],
+    .light-ui .modal-card .bg-white\/\[0\.045\],
+    .light-ui .sidebar .bg-white\/5,
+    .light-ui .modal-card .bg-white\/5 {
+      background-color: rgba(255, 255, 255, 0.96) !important;
+    }
+
+    .light-ui .sidebar .bg-slate-950\/35,
+    .light-ui .sidebar .bg-slate-950\/45,
+    .light-ui .sidebar .bg-slate-950\/55,
+    .light-ui .modal-card .bg-slate-950\/55 {
+      background-color: rgba(255, 255, 255, 0.98) !important;
+    }
+
+    .light-ui .sidebar .border-slate-200\/10,
+    .light-ui .modal-card .border-slate-200\/10 {
+      border-color: rgba(15, 23, 42, 0.12) !important;
+    }
+
+    .light-ui .sidebar .text-cyan-200\/80,
+    .light-ui .mobile-map-top .text-cyan-200\/80 {
+      color: #0e7490 !important;
+    }
+
+    .light-ui .sidebar .text-emerald-100\/70 {
+      color: #047857 !important;
+    }
+
+    .light-ui .sidebar .text-rose-100\/70 {
+      color: #be123c !important;
+    }
+
+    .light-ui .sidebar .text-emerald-200,
+    .light-ui .modal-card .text-emerald-200 {
+      color: #047857 !important;
+    }
+
+    .light-ui .sidebar .text-rose-200,
+    .light-ui .modal-card .text-rose-200 {
+      color: #be123c !important;
+    }
+
+    .light-ui .sidebar .bg-emerald-300\/\[0\.07\],
+    .light-ui .sidebar .bg-emerald-300\/10,
+    .light-ui .modal-card .bg-emerald-300\/10 {
+      background-color: rgba(209, 250, 229, 0.95) !important;
+    }
+
+    .light-ui .sidebar .bg-rose-300\/\[0\.07\],
+    .light-ui .sidebar .bg-rose-300\/10,
+    .light-ui .modal-card .bg-rose-300\/10 {
+      background-color: rgba(255, 228, 230, 0.96) !important;
+    }
+
+    .light-ui .sidebar .border-emerald-300\/15,
+    .light-ui .modal-card .border-emerald-300\/15 {
+      border-color: rgba(5, 150, 105, 0.32) !important;
+    }
+
+    .light-ui .sidebar .border-rose-300\/15,
+    .light-ui .modal-card .border-rose-300\/15 {
+      border-color: rgba(225, 29, 72, 0.32) !important;
+    }
+
+    .light-ui .sidebar .bg-cyan-300 {
+      background-color: #0891b2 !important;
+      color: #ffffff !important;
+    }
+
+    .light-ui .sidebar .badge-client,
+    .light-ui .modal-card .badge-client,
+    .leaflet-popup-content-wrapper .badge-client {
+      background: #047857 !important;
+      border-color: #047857 !important;
+      color: #ffffff !important;
+    }
+
+    .light-ui .sidebar .badge-competition,
+    .light-ui .modal-card .badge-competition,
+    .leaflet-popup-content-wrapper .badge-competition {
+      background: #be123c !important;
+      border-color: #be123c !important;
+      color: #ffffff !important;
+    }
+
+    .light-ui .sidebar .record-meta,
+    .leaflet-popup-content-wrapper .record-meta {
+      color: #334155 !important;
+    }
+
+    .light-ui .sidebar .record-subtle,
+    .leaflet-popup-content-wrapper .record-subtle {
+      color: #475569 !important;
+    }
+
+    .light-ui .sidebar .text-slate-950 {
+      color: #0f172a !important;
+    }
+
+    .light-ui input,
+    .light-ui select,
+    .light-ui textarea {
+      color: #0f172a !important;
+    }
+
+    .light-ui input::placeholder,
+    .light-ui textarea::placeholder {
+      color: #94a3b8 !important;
+    }
+
+    .light-ui #toast {
+      background: rgba(255, 255, 255, 0.9) !important;
+      color: #0f172a !important;
+      box-shadow: 0 20px 54px rgba(15, 23, 42, .16);
+    }
+
+    .light-ui #loadingOverlay {
+      background: rgba(241, 245, 249, 0.42) !important;
+    }
+
+    .light-ui #loadingOverlay > div,
+    .light-ui .mobile-map-top > div {
+      background: rgba(255, 255, 255, 0.86) !important;
+      color: #0f172a;
+      border-color: rgba(15, 23, 42, 0.12) !important;
+    }
+
+    .light-ui .leaflet-container {
+      filter: saturate(1.04) contrast(1.01);
+    }
+
+    .app-brand {
+      color: #075985 !important;
+      letter-spacing: .18em;
+      font-weight: 900;
+    }
+
+    .primary-action {
+      background: linear-gradient(135deg, #0f766e, #0369a1) !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(3, 105, 161, .35);
+      box-shadow: 0 14px 34px rgba(3, 105, 161, .22);
+    }
+
+    .primary-action:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 18px 42px rgba(15, 118, 110, .28);
+    }
+
+    .type-tab {
+      color: #1e293b !important;
+    }
+
+    .type-tab.is-active {
+      background: #0f766e !important;
+      color: #ffffff !important;
+      box-shadow: 0 10px 22px rgba(15, 118, 110, .22);
+    }
+
+    .stat-card {
+      background: #ffffff !important;
+      border-color: rgba(15, 23, 42, .15) !important;
+    }
+
+    .stat-card strong {
+      color: #0f172a !important;
+    }
+
+    .stat-client {
+      background: #d1fae5 !important;
+      border-color: rgba(5, 150, 105, .38) !important;
+    }
+
+    .stat-client strong,
+    .stat-client span {
+      color: #065f46 !important;
+    }
+
+    .stat-competition {
+      background: #ffe4e6 !important;
+      border-color: rgba(190, 18, 60, .38) !important;
+    }
+
+    .stat-competition strong,
+    .stat-competition span {
+      color: #9f1239 !important;
+    }
+
+    .contact-popup {
+      width: 310px;
+      padding: 16px;
+      color: #0f172a;
+    }
+
+    .popup-title {
+      margin-top: 10px;
+      color: #0f172a;
+      font-size: 18px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .popup-details {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+      color: #334155;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .popup-details b {
+      color: #0f172a;
+      font-weight: 900;
+    }
+
+    .popup-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .popup-action {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: 8px;
+      color: #ffffff !important;
+      font-size: 13px;
+      font-weight: 900;
+      text-decoration: none;
+      border: 1px solid transparent;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, .14);
+      transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
+    }
+
+    .popup-action:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, .2);
+    }
+
+    .popup-action svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.7;
+    }
+
+    .popup-whatsapp { background: #047857; }
+    .popup-instagram { background: linear-gradient(135deg, #be123c, #7c3aed); }
+    .popup-web { background: #075985; }
+
+    .record-card {
+      background: #ffffff !important;
+      border-color: rgba(15, 23, 42, .14) !important;
+    }
+
+    .record-card:hover {
+      border-color: rgba(15, 118, 110, .46) !important;
+    }
+
+    .record-icon-client {
+      background: #d1fae5 !important;
+      border-color: #34d399 !important;
+      color: #047857 !important;
+    }
+
+    .record-icon-competition {
+      background: #ffe4e6 !important;
+      border-color: #fb7185 !important;
+      color: #be123c !important;
+    }
+
+    .record-title {
+      color: #0f172a !important;
+      font-weight: 900;
+    }
+
+    .record-meta,
+    .record-subtle {
+      font-weight: 650;
+    }
+
+    .form-input,
+    #searchInput,
+    #stateFilter,
+    #zoneFilter {
+      border-color: rgba(15, 23, 42, .18) !important;
+      background: #ffffff !important;
+      color: #0f172a !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
+    }
+
+    #searchInput::placeholder {
+      color: #64748b !important;
+      opacity: 1;
+    }
+
+    .light-ui #mobileNewBtn,
+    .light-ui #saveBtn {
+      background: linear-gradient(135deg, #0f766e, #0369a1) !important;
+      color: #ffffff !important;
+      box-shadow: 0 14px 34px rgba(3, 105, 161, .22);
+    }
+
+    .light-ui #saveBtn svg,
+    .light-ui #mobileNewBtn svg,
+    .primary-action svg {
+      color: #ffffff !important;
+      stroke: currentColor;
+    }
+  </style>
+</head>
+<body class="light-ui">
+  <div id="toast" class="toast fixed right-5 top-5 z-[80] rounded-lg border border-emerald-300/20 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 shadow-glow backdrop-blur-md">
+    <div class="flex items-center gap-3">
+      <i data-lucide="check-circle-2" class="h-5 w-5 text-emerald-300"></i>
+      <span id="toastText">Registro guardado</span>
+    </div>
+  </div>
+
+  <main class="app-shell">
+    <aside id="sidebar" class="sidebar glass-panel">
+      <button id="sheetToggle" class="sheet-handle" aria-label="Abrir panel"></button>
+
+      <header class="border-b border-slate-200/10 px-5 pb-4 pt-4">
+        <div class="mb-4 flex items-start justify-between gap-4">
+          <div>
+            <div class="app-brand mb-2 flex items-center gap-2 text-xs uppercase">
+              <span class="h-2 w-2 rounded-full bg-emerald-300 shadow-glow"></span>
+              Venezuela
+            </div>
+            <h1 class="font-display text-2xl font-extrabold leading-tight text-white">GeoClientes Venezuela</h1>
+            <p class="mt-1 text-sm text-slate-300">Clientes y competencia en un mapa vivo.</p>
+          </div>
+          <button id="refreshBtn" class="rounded-lg border border-slate-200/10 bg-white/5 p-2 text-slate-200 transition hover:border-cyan-300/30 hover:bg-cyan-300/10" title="Actualizar datos" aria-label="Actualizar datos">
+            <i data-lucide="refresh-cw" class="h-5 w-5"></i>
+          </button>
+        </div>
+
+        <button id="newRecordBtn" class="primary-action flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-bold transition active:scale-[0.99]">
+          <i data-lucide="plus" class="h-5 w-5"></i>
+          Nuevo Registro
+        </button>
+      </header>
+
+      <section class="grid grid-cols-3 gap-2 border-b border-slate-200/10 px-5 py-4">
+        <button class="stat-card rounded-lg border border-slate-200/10 bg-white/[0.045] px-3 py-3 text-left transition hover:border-cyan-300/25" data-stat-filter="TODOS">
+          <span class="block text-xs text-slate-400">Registros</span>
+          <strong id="totalCount" class="mt-1 block font-display text-2xl text-white">0</strong>
+        </button>
+        <button class="stat-card stat-client rounded-lg border border-emerald-300/15 bg-emerald-300/[0.07] px-3 py-3 text-left transition hover:border-emerald-300/35" data-stat-filter="CLIENTE">
+          <span class="block text-xs text-emerald-100/70">Clientes</span>
+          <strong id="clientCount" class="mt-1 block font-display text-2xl text-emerald-200">0</strong>
+        </button>
+        <button class="stat-card stat-competition rounded-lg border border-rose-300/15 bg-rose-300/[0.07] px-3 py-3 text-left transition hover:border-rose-300/35" data-stat-filter="COMPETENCIA">
+          <span class="block text-xs text-rose-100/70">Competencia</span>
+          <strong id="competitionCount" class="mt-1 block font-display text-2xl text-rose-200">0</strong>
+        </button>
+      </section>
+
+      <section class="space-y-3 border-b border-slate-200/10 px-5 py-4">
+        <div class="relative">
+          <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"></i>
+          <input id="searchInput" class="w-full rounded-lg border border-slate-200/10 bg-slate-950/45 py-3 pl-10 pr-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300/40 focus:ring-4 focus:ring-cyan-300/10" placeholder="Buscar nombre, dirección o zona" />
+        </div>
+
+        <div id="typeTabs" class="grid grid-cols-3 gap-2 rounded-lg border border-slate-200/10 bg-slate-950/35 p-1">
+          <button class="type-tab is-active rounded-md px-2 py-2 text-xs font-bold transition" data-type="TODOS">Todos</button>
+          <button class="type-tab rounded-md px-2 py-2 text-xs font-bold text-slate-300 transition hover:bg-white/5" data-type="CLIENTE">Clientes</button>
+          <button class="type-tab rounded-md px-2 py-2 text-xs font-bold text-slate-300 transition hover:bg-white/5" data-type="COMPETENCIA">Competencia</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <label class="block">
+            <span class="mb-1 block text-xs font-medium text-slate-400">Estado</span>
+            <select id="stateFilter" class="w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-2.5 text-sm text-slate-100 outline-none focus:border-cyan-300/40">
+              <option value="">Todos</option>
+            </select>
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-medium text-slate-400">Zona</span>
+            <select id="zoneFilter" class="w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-2.5 text-sm text-slate-100 outline-none focus:border-cyan-300/40">
+              <option value="">Todas</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="flex min-h-0 flex-1 flex-col">
+        <div class="flex items-center justify-between px-5 py-3">
+          <p class="text-sm font-semibold text-slate-200"><span id="visibleCount">0</span> visibles</p>
+          <button id="fitBtn" class="flex items-center gap-1 rounded-lg border border-slate-200/10 bg-white/5 px-3 py-2 text-xs font-bold text-slate-200 transition hover:border-cyan-300/30 hover:bg-cyan-300/10">
+            <i data-lucide="scan" class="h-4 w-4"></i>
+            Ajustar
+          </button>
+        </div>
+        <div id="list" class="scroll-area min-h-0 flex-1 space-y-3 px-5 pb-5"></div>
+      </section>
+    </aside>
+
+    <section class="map-wrap">
+      <div id="map"></div>
+      <div class="mobile-map-top pointer-events-none absolute left-4 right-4 top-4 z-[500] hidden items-center justify-between gap-3">
+        <div class="rounded-lg border border-slate-200/10 bg-slate-950/65 px-4 py-3 shadow-glow backdrop-blur-md">
+          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200/80">GeoClientes</p>
+          <p class="text-sm font-bold text-white">Venezuela</p>
+        </div>
+        <button id="mobileNewBtn" class="pointer-events-auto rounded-lg bg-gradient-to-r from-emerald-300 to-cyan-300 p-3 text-slate-950 shadow-glow" aria-label="Nuevo registro">
+          <i data-lucide="plus" class="h-5 w-5"></i>
+        </button>
+      </div>
+      <div id="loadingOverlay" class="absolute inset-0 z-[600] grid place-items-center bg-slate-950/50 backdrop-blur-sm">
+        <div class="w-[min(360px,86vw)] rounded-lg border border-slate-200/10 bg-slate-950/78 p-5 shadow-glow">
+          <div class="mb-4 flex items-center gap-3">
+            <span class="grid h-10 w-10 place-items-center rounded-lg bg-cyan-300/10 text-cyan-200">
+              <i data-lucide="map" class="h-5 w-5"></i>
+            </span>
+            <div>
+              <p class="font-display text-lg font-bold">Cargando mapa comercial</p>
+              <p class="text-sm text-slate-400">Leyendo datos de Google Sheets</p>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div class="skeleton h-3 rounded-full"></div>
+            <div class="skeleton h-3 w-4/5 rounded-full"></div>
+            <div class="skeleton h-3 w-2/3 rounded-full"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal" class="modal-backdrop fixed inset-0 z-[90] grid place-items-center bg-black/62 p-4 backdrop-blur-sm">
+    <form id="recordForm" class="modal-card glass-panel max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-lg">
+      <div class="flex items-start justify-between border-b border-slate-200/10 px-5 py-4">
+        <div>
+          <h2 class="font-display text-xl font-extrabold text-white">Nuevo Registro</h2>
+          <p class="mt-1 text-sm text-slate-400">Se guardará en Google Sheets y aparecerá en el mapa.</p>
+        </div>
+        <button type="button" id="closeModalBtn" class="rounded-lg border border-slate-200/10 bg-white/5 p-2 text-slate-300 transition hover:bg-white/10" aria-label="Cerrar">
+          <i data-lucide="x" class="h-5 w-5"></i>
+        </button>
+      </div>
+
+      <div class="scroll-area max-h-[calc(92vh-150px)] p-5">
+        <div class="grid gap-4 md:grid-cols-2">
+          <label class="block">
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Tipo</span>
+            <select name="TIPO" required class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40">
+              <option value="CLIENTE">CLIENTE</option>
+              <option value="COMPETENCIA">COMPETENCIA</option>
+            </select>
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Nombre</span>
+            <input name="NOMBRE" required class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Zona</span>
+            <input name="ZONA" required class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Estado</span>
+            <input name="ESTADO" required list="venezuelaStates" class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+          </label>
+          <label class="block md:col-span-2">
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Dirección</span>
+            <input name="DIRECCION" required class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Coordenadas</span>
+            <input name="COORDENADAS" placeholder="10.4806, -66.9036" class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Teléfono</span>
+            <input name="TELEFONO" placeholder="+58 412 000 0000" class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Instagram</span>
+            <input name="INSTAGRAM" placeholder="@usuario" class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Correo</span>
+            <input name="CORREO" type="email" class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+          </label>
+          <label class="block md:col-span-2">
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Web</span>
+            <input name="WEB" placeholder="https://..." class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+          </label>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 border-t border-slate-200/10 px-5 py-4">
+        <button type="button" id="cancelBtn" class="rounded-lg border border-slate-200/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-slate-200 transition hover:bg-white/10">Cancelar</button>
+        <button id="saveBtn" type="submit" class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-300 to-cyan-300 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-glow transition hover:brightness-110">
+          <i data-lucide="save" class="h-4 w-4"></i>
+          Guardar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <datalist id="venezuelaStates"></datalist>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <script>
+    const GOOGLE_SHEETS_API_URL = "TU_URL_DE_APPS_SCRIPT_AQUI";
+
+    const FALLBACK_DATA = [
+      {
+        TIPO: "CLIENTE",
+        NOMBRE: "Farmacia Altamira",
+        ZONA: "Altamira",
+        ESTADO: "Distrito Capital",
+        DIRECCION: "Av. Luis Roche, Altamira",
+        COORDENADAS: "10.5006, -66.8516",
+        TELEFONO: "+58 412 123 4567",
+        INSTAGRAM: "@farmaciaaltamira",
+        CORREO: "contacto@altamira.demo",
+        WEB: "https://example.com"
+      },
+      {
+        TIPO: "COMPETENCIA",
+        NOMBRE: "Market Salud Chacao",
+        ZONA: "Chacao",
+        ESTADO: "Miranda",
+        DIRECCION: "Centro Chacao",
+        COORDENADAS: "10.4942, -66.8558",
+        TELEFONO: "+58 414 555 1200",
+        INSTAGRAM: "@marketsalud",
+        CORREO: "",
+        WEB: ""
+      },
+      {
+        TIPO: "CLIENTE",
+        NOMBRE: "Distribuidora Lago",
+        ZONA: "Maracaibo",
+        ESTADO: "Zulia",
+        DIRECCION: "Av. 5 de Julio",
+        COORDENADAS: "10.6500, -71.6333",
+        TELEFONO: "+58 424 987 3301",
+        INSTAGRAM: "",
+        CORREO: "ventas@lago.demo",
+        WEB: ""
+      }
+    ];
+
+    const STATE_COORDS = {
+      "Amazonas": [5.6639, -67.6236],
+      "Anzoategui": [9.0797, -64.6667],
+      "Anzoátegui": [9.0797, -64.6667],
+      "Apure": [7.8940, -67.4731],
+      "Aragua": [10.2469, -67.5958],
+      "Barinas": [8.6226, -70.2075],
+      "Bolivar": [8.1292, -63.5409],
+      "Bolívar": [8.1292, -63.5409],
+      "Carabobo": [10.1620, -68.0077],
+      "Cojedes": [9.6580, -68.5827],
+      "Delta Amacuro": [9.0622, -62.0510],
+      "Distrito Capital": [10.5000, -66.9167],
+      "Falcon": [11.1811, -69.8597],
+      "Falcón": [11.1811, -69.8597],
+      "Guarico": [9.9115, -67.3538],
+      "Guárico": [9.9115, -67.3538],
+      "Lara": [10.0678, -69.3474],
+      "Merida": [8.5897, -71.1561],
+      "Mérida": [8.5897, -71.1561],
+      "Miranda": [10.2500, -66.4167],
+      "Monagas": [9.7457, -63.1832],
+      "Nueva Esparta": [10.9971, -63.9113],
+      "Portuguesa": [9.0944, -69.0970],
+      "Sucre": [10.4635, -64.1775],
+      "Tachira": [7.9137, -72.1416],
+      "Táchira": [7.9137, -72.1416],
+      "Trujillo": [9.3658, -70.4360],
+      "La Guaira": [10.6016, -66.9346],
+      "Vargas": [10.6016, -66.9346],
+      "Yaracuy": [10.3394, -68.7425],
+      "Zulia": [10.6500, -71.6333]
+    };
+
+    const app = {
+      map: null,
+      cluster: null,
+      records: [],
+      filtered: [],
+      markers: new Map(),
+      pageSize: 40,
+      renderedCount: 0,
+      filters: { q: "", type: "TODOS", state: "", zone: "" }
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const listEl = $("#list");
+    const loadingOverlay = $("#loadingOverlay");
+    const sidebar = $("#sidebar");
+
+    function init() {
+      lucide.createIcons();
+      initMap();
+      bindEvents();
+      fillStateDatalist();
+      loadRecords();
+    }
+
+    function initMap() {
+      app.map = L.map("map", {
+        zoomControl: false,
+        preferCanvas: true,
+        minZoom: 5,
+        maxBounds: L.latLngBounds([0.4, -74.8], [13.8, -58.2]),
+        maxBoundsViscosity: 0.75
+      }).setView([7.7, -66.2], 6);
+
+      L.control.zoom({ position: "bottomright" }).addTo(app.map);
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 20
+      }).addTo(app.map);
+
+      app.cluster = L.markerClusterGroup({
+        showCoverageOnHover: false,
+        spiderfyOnMaxZoom: true,
+        spiderLegPolylineOptions: { weight: 2, color: "#0f172a", opacity: 0.55 },
+        zoomToBoundsOnClick: true,
+        removeOutsideVisibleBounds: true,
+        chunkedLoading: true,
+        chunkInterval: 160,
+        chunkDelay: 35,
+        maxClusterRadius: (zoom) => zoom >= 15 ? 18 : zoom >= 12 ? 30 : 48,
+        iconCreateFunction: (cluster) => {
+          const count = cluster.getChildCount();
+          const size = count >= 500 ? 66 : count >= 100 ? 56 : 48;
+          const level = count >= 500 ? "large" : count >= 100 ? "medium" : "small";
+          return L.divIcon({
+            html: `<div><span>${formatCount(count)}</span></div>`,
+            className: `marker-cluster cluster-${level}`,
+            iconSize: L.point(size, size)
+          });
+        }
+      });
+
+      app.map.addLayer(app.cluster);
+    }
+
+    function bindEvents() {
+      $("#newRecordBtn").addEventListener("click", openModal);
+      $("#mobileNewBtn").addEventListener("click", openModal);
+      $("#closeModalBtn").addEventListener("click", closeModal);
+      $("#cancelBtn").addEventListener("click", closeModal);
+      $("#modal").addEventListener("click", (event) => {
+        if (event.target.id === "modal") closeModal();
+      });
+      $("#recordForm").addEventListener("submit", saveRecord);
+      $("#refreshBtn").addEventListener("click", loadRecords);
+      $("#fitBtn").addEventListener("click", fitVisibleMarkers);
+      $("#sheetToggle").addEventListener("click", () => {
+        sidebar.classList.toggle("expanded");
+        setTimeout(() => app.map.invalidateSize(), 340);
+      });
+
+      ["searchInput", "stateFilter", "zoneFilter"].forEach((id) => {
+        $(`#${id}`).addEventListener("focus", expandMobileSheet);
+        $(`#${id}`).addEventListener("click", expandMobileSheet);
+      });
+
+      $("#searchInput").addEventListener("input", (event) => {
+        app.filters.q = event.target.value.trim().toLowerCase();
+        applyFilters(true);
+      });
+
+      $("#stateFilter").addEventListener("change", (event) => {
+        app.filters.state = event.target.value;
+        rebuildZoneFilter();
+        applyFilters(true);
+      });
+
+      $("#zoneFilter").addEventListener("change", (event) => {
+        app.filters.zone = event.target.value;
+        applyFilters(true);
+      });
+
+      document.querySelectorAll(".type-tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          expandMobileSheet();
+          setTypeFilter(button.dataset.type);
+        });
+      });
+
+      document.querySelectorAll(".stat-card").forEach((button) => {
+        button.addEventListener("click", () => setTypeFilter(button.dataset.statFilter));
+      });
+
+      listEl.addEventListener("scroll", () => {
+        const nearBottom = listEl.scrollTop + listEl.clientHeight >= listEl.scrollHeight - 220;
+        if (nearBottom) renderMoreCards();
+      });
+    }
+
+    async function loadRecords() {
+      showLoading(true);
+      app.markers.clear();
+      app.cluster.clearLayers();
+      listEl.innerHTML = renderSkeletonCards();
+
+      try {
+        let data;
+        if (!isConfiguredApi()) {
+          data = FALLBACK_DATA;
+          showToast("Usando datos demo. Configura GOOGLE_SHEETS_API_URL para conectar Sheets.", "info");
+        } else {
+          const response = await fetch(GOOGLE_SHEETS_API_URL, { method: "GET" });
+          if (!response.ok) throw new Error("No se pudo leer Google Sheets");
+          const payload = await response.json();
+          data = Array.isArray(payload) ? payload : (payload.data || payload.records || []);
+        }
+
+        app.records = await normalizeRecords(data);
+        rebuildFilters();
+        applyFilters(false);
+        fitVisibleMarkers();
+      } catch (error) {
+        console.error(error);
+        app.records = await normalizeRecords(FALLBACK_DATA);
+        rebuildFilters();
+        applyFilters(false);
+        fitVisibleMarkers();
+        showToast("No se pudo conectar. Mostrando datos demo.", "error");
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function normalizeRecords(records) {
+      const cleaned = [];
+      for (const raw of records) {
+        const record = {};
+        ["TIPO", "NOMBRE", "ZONA", "ESTADO", "DIRECCION", "COORDENADAS", "TELEFONO", "INSTAGRAM", "CORREO", "WEB"].forEach((key) => {
+          record[key] = String(raw[key] ?? "").trim();
+        });
+
+        record.TIPO = normalizeType(record.TIPO);
+        const parsed = parseCoordinates(record.COORDENADAS);
+        if (parsed) {
+          record.lat = parsed[0];
+          record.lng = parsed[1];
+          record.coordSource = "sheet";
+        } else {
+          const geo = await geocodeRecord(record);
+          record.lat = geo[0];
+          record.lng = geo[1];
+          record.coordSource = geo[2];
+        }
+        record.id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+        cleaned.push(record);
+      }
+      return cleaned;
+    }
+
+    function normalizeType(value) {
+      const upper = removeAccents(value).toUpperCase();
+      return upper.includes("COMP") ? "COMPETENCIA" : "CLIENTE";
+    }
+
+    function parseCoordinates(value) {
+      if (!value) return null;
+      const match = value.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
+      if (!match) return null;
+      const lat = Number(match[1]);
+      const lng = Number(match[2]);
+      if (Number.isFinite(lat) && Number.isFinite(lng)) return [lat, lng];
+      return null;
+    }
+
+    async function geocodeRecord(record) {
+      const fallback = findStateCoords(record.ESTADO);
+      const query = [record.DIRECCION, record.ZONA, record.ESTADO, "Venezuela"].filter(Boolean).join(", ");
+
+      if (query.length > 12) {
+        try {
+          const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ve&q=${encodeURIComponent(query)}`;
+          const response = await fetch(url, { headers: { "Accept": "application/json" } });
+          if (response.ok) {
+            const data = await response.json();
+            if (data[0]?.lat && data[0]?.lon) return [Number(data[0].lat), Number(data[0].lon), "nominatim"];
+          }
+        } catch (error) {
+          console.warn("Nominatim fallback:", error);
+        }
+      }
+
+      return [...fallback, "estado"];
+    }
+
+    function findStateCoords(state) {
+      const clean = removeAccents(state).toLowerCase();
+      const entry = Object.entries(STATE_COORDS).find(([name]) => removeAccents(name).toLowerCase() === clean);
+      return entry ? entry[1] : [8.3, -66.6];
+    }
+
+    function rebuildFilters() {
+      const states = uniqueSorted(app.records.map((record) => record.ESTADO));
+      fillSelect($("#stateFilter"), states, "Todos");
+      rebuildZoneFilter();
+      updateStats();
+    }
+
+    function rebuildZoneFilter() {
+      const zones = uniqueSorted(app.records
+        .filter((record) => !app.filters.state || record.ESTADO === app.filters.state)
+        .map((record) => record.ZONA));
+      fillSelect($("#zoneFilter"), zones, "Todas");
+      if (app.filters.zone && !zones.includes(app.filters.zone)) app.filters.zone = "";
+      $("#zoneFilter").value = app.filters.zone;
+    }
+
+    function fillStateDatalist() {
+      $("#venezuelaStates").innerHTML = Object.keys(STATE_COORDS)
+        .filter((name, index, arr) => arr.indexOf(name) === index)
+        .sort((a, b) => a.localeCompare(b, "es"))
+        .map((name) => `<option value="${escapeHtml(name)}"></option>`)
+        .join("");
+    }
+
+    function fillSelect(select, values, allLabel) {
+      const previous = select.value;
+      select.innerHTML = `<option value="">${allLabel}</option>` + values.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
+      select.value = values.includes(previous) ? previous : "";
+    }
+
+    function setTypeFilter(type) {
+      app.filters.type = type;
+      document.querySelectorAll(".type-tab").forEach((button) => {
+        const active = button.dataset.type === type;
+        button.className = active
+          ? "type-tab is-active rounded-md px-2 py-2 text-xs font-bold transition"
+          : "type-tab rounded-md px-2 py-2 text-xs font-bold transition hover:bg-white/5";
+      });
+      applyFilters(true);
+    }
+
+    function applyFilters(animate) {
+      const q = app.filters.q;
+      app.filtered = app.records.filter((record) => {
+        const text = `${record.NOMBRE} ${record.DIRECCION} ${record.ZONA}`.toLowerCase();
+        const matchText = !q || removeAccents(text).includes(removeAccents(q));
+        const matchType = app.filters.type === "TODOS" || record.TIPO === app.filters.type;
+        const matchState = !app.filters.state || record.ESTADO === app.filters.state;
+        const matchZone = !app.filters.zone || record.ZONA === app.filters.zone;
+        return matchText && matchType && matchState && matchZone;
+      });
+
+      updateStats();
+      renderMarkers();
+      renderCards(true);
+      $("#visibleCount").textContent = app.filtered.length;
+
+      if (animate && window.gsap) {
+        gsap.fromTo(".record-card", { opacity: 0, y: 8 }, { opacity: 1, y: 0, stagger: 0.025, duration: 0.28, ease: "power2.out" });
+      }
+    }
+
+    function updateStats() {
+      $("#totalCount").textContent = app.records.length;
+      $("#clientCount").textContent = app.records.filter((record) => record.TIPO === "CLIENTE").length;
+      $("#competitionCount").textContent = app.records.filter((record) => record.TIPO === "COMPETENCIA").length;
+    }
+
+    function renderMarkers() {
+      app.cluster.clearLayers();
+      app.markers.clear();
+      app.filtered.forEach((record) => {
+        const marker = L.marker([record.lat, record.lng], { icon: makeIcon(record.TIPO) });
+        marker.bindPopup(makePopup(record), { closeButton: true, offset: [0, -4] });
+        marker.on("click", () => highlightCard(record.id));
+        app.markers.set(record.id, marker);
+        app.cluster.addLayer(marker);
+      });
+    }
+
+    function makeIcon(type) {
+      const isClient = type === "CLIENTE";
+      const iconName = isClient ? "store" : "swords";
+      return L.divIcon({
+        className: "marker-icon",
+        html: `<div class="custom-marker ${isClient ? "marker-client" : "marker-competition"}"><i data-lucide="${iconName}"></i></div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
+        popupAnchor: [0, -18]
+      });
+    }
+
+    function makePopup(record) {
+      const isClient = record.TIPO === "CLIENTE";
+      return `
+        <article class="contact-popup">
+          <div class="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <span class="rounded-full ${isClient ? "badge-client" : "badge-competition"} px-2.5 py-1 text-[11px] font-extrabold">${record.TIPO}</span>
+              <h3 class="popup-title">${escapeHtml(record.NOMBRE || "Sin nombre")}</h3>
+            </div>
+          </div>
+          <div class="popup-details">
+            <p><b class="text-slate-100">Estado:</b> ${escapeHtml(record.ESTADO || "N/D")}</p>
+            <p><b class="text-slate-100">Zona:</b> ${escapeHtml(record.ZONA || "N/D")}</p>
+            <p><b class="text-slate-100">Teléfono:</b> ${escapeHtml(record.TELEFONO || "N/D")}</p>
+          </div>
+          <div class="popup-actions">
+            ${record.TELEFONO ? popupLink(whatsAppUrl(record.TELEFONO), "WhatsApp", "message-circle", "emerald") : ""}
+            ${record.INSTAGRAM ? popupLink(instagramUrl(record.INSTAGRAM), "Instagram", "instagram", "pink") : ""}
+            ${record.WEB ? popupLink(normalizeUrl(record.WEB), "Web", "globe", "cyan") : ""}
+          </div>
+        </article>
+      `;
+    }
+
+    function popupLink(href, label, icon, tone) {
+      const tones = {
+        emerald: "popup-whatsapp",
+        pink: "popup-instagram",
+        cyan: "popup-web"
+      };
+      return `<a target="_blank" rel="noopener" class="popup-action ${tones[tone]}" href="${href}"><i data-lucide="${icon}"></i><span>${label}</span></a>`;
+    }
+
+    function renderCards(reset) {
+      if (reset) {
+        app.renderedCount = 0;
+        listEl.innerHTML = "";
+      }
+      renderMoreCards();
+    }
+
+    function renderMoreCards() {
+      const next = app.filtered.slice(app.renderedCount, app.renderedCount + app.pageSize);
+      if (!next.length && app.renderedCount === 0) {
+        listEl.innerHTML = `
+          <div class="rounded-lg border border-slate-200/10 bg-white/[0.045] p-5 text-center">
+            <i data-lucide="map-pin-off" class="mx-auto mb-3 h-8 w-8 text-slate-400"></i>
+            <p class="font-semibold text-slate-200">No hay registros visibles</p>
+            <p class="mt-1 text-sm text-slate-400">Prueba con otros filtros.</p>
+          </div>`;
+        lucide.createIcons();
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      next.forEach((record) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.id = record.id;
+        button.className = "record-card w-full rounded-lg border border-slate-200/10 bg-white/[0.045] p-4 text-left";
+        button.innerHTML = makeCard(record);
+        button.addEventListener("click", () => selectRecord(record.id));
+        fragment.appendChild(button);
+      });
+      listEl.appendChild(fragment);
+      app.renderedCount += next.length;
+      lucide.createIcons();
+    }
+
+    function makeCard(record) {
+      const isClient = record.TIPO === "CLIENTE";
+      const tone = isClient ? "record-icon-client" : "record-icon-competition";
+      const badge = isClient ? "badge-client" : "badge-competition";
+      return `
+        <div class="flex items-start gap-3">
+          <span class="grid h-10 w-10 flex-none place-items-center rounded-lg ${tone} border">
+            <i data-lucide="${isClient ? "store" : "swords"}" class="h-5 w-5"></i>
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="flex items-center justify-between gap-2">
+              <strong class="record-title truncate text-sm">${escapeHtml(record.NOMBRE || "Sin nombre")}</strong>
+              <span class="rounded-full ${badge} px-2 py-1 text-[10px] font-extrabold">${record.TIPO}</span>
+            </span>
+            <span class="record-subtle mt-1 block truncate text-xs">${escapeHtml(record.DIRECCION || "Sin dirección")}</span>
+            <span class="record-meta mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+              <span class="flex items-center gap-1"><i data-lucide="map-pin" class="h-3.5 w-3.5"></i>${escapeHtml(record.ESTADO || "N/D")}</span>
+              <span class="flex items-center gap-1"><i data-lucide="navigation" class="h-3.5 w-3.5"></i>${escapeHtml(record.ZONA || "N/D")}</span>
+            </span>
+          </span>
+        </div>
+      `;
+    }
+
+    function selectRecord(id) {
+      const record = app.filtered.find((item) => item.id === id);
+      const marker = app.markers.get(id);
+      if (!record || !marker) return;
+      const isMobile = window.matchMedia("(max-width: 900px)").matches;
+      app.map.flyTo([record.lat, record.lng], Math.max(app.map.getZoom(), 14), { animate: true, duration: 1.15 });
+      setTimeout(() => {
+        marker.openPopup();
+        lucide.createIcons();
+      }, 650);
+      highlightCard(id);
+      if (isMobile) sidebar.classList.remove("expanded");
+    }
+
+    function expandMobileSheet() {
+      if (window.matchMedia("(max-width: 900px)").matches) {
+        sidebar.classList.add("expanded");
+        setTimeout(() => app.map.invalidateSize(), 340);
+      }
+    }
+
+    function highlightCard(id) {
+      document.querySelectorAll(".record-card").forEach((card) => {
+        const active = card.dataset.id === id;
+        card.classList.toggle("border-cyan-300/60", active);
+        card.classList.toggle("bg-cyan-300/10", active);
+        if (active) card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+    }
+
+    async function saveRecord(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const saveBtn = $("#saveBtn");
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+      payload.TIPO = normalizeType(payload.TIPO);
+
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-950/30 border-t-slate-950"></span> Guardando`;
+
+      try {
+        if (isConfiguredApi()) {
+          const response = await fetch(GOOGLE_SHEETS_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) throw new Error("No se pudo guardar");
+        }
+
+        const [record] = await normalizeRecords([payload]);
+        app.records.unshift(record);
+        form.reset();
+        closeModal();
+        rebuildFilters();
+        applyFilters(true);
+        selectRecord(record.id);
+        showToast("Registro guardado y agregado al mapa.", "success");
+      } catch (error) {
+        console.error(error);
+        showToast("No se pudo guardar el registro.", "error");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<i data-lucide="save" class="h-4 w-4"></i> Guardar`;
+        lucide.createIcons();
+      }
+    }
+
+    function openModal() {
+      $("#modal").classList.add("open");
+      setTimeout(() => document.querySelector("[name='NOMBRE']").focus(), 120);
+      if (window.gsap) gsap.fromTo(".form-input", { opacity: 0, y: 8 }, { opacity: 1, y: 0, stagger: 0.025, duration: .24, ease: "power2.out" });
+    }
+
+    function closeModal() {
+      $("#modal").classList.remove("open");
+    }
+
+    function fitVisibleMarkers() {
+      const markers = Array.from(app.markers.values());
+      if (!markers.length) return app.map.flyTo([7.7, -66.2], 6, { duration: .9 });
+      const group = L.featureGroup(markers);
+      app.map.fitBounds(group.getBounds().pad(0.18), { animate: true, duration: 1, maxZoom: 14 });
+    }
+
+    function showLoading(show) {
+      loadingOverlay.style.display = show ? "grid" : "none";
+    }
+
+    function showToast(message, type = "success") {
+      const toast = $("#toast");
+      const icon = type === "error" ? "alert-triangle" : type === "info" ? "info" : "check-circle-2";
+      const color = type === "error" ? "text-rose-300" : type === "info" ? "text-cyan-300" : "text-emerald-300";
+      $("#toastText").textContent = message;
+      toast.querySelector("i").setAttribute("data-lucide", icon);
+      toast.querySelector("i").className = `h-5 w-5 ${color}`;
+      lucide.createIcons();
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 3400);
+    }
+
+    function renderSkeletonCards() {
+      return Array.from({ length: 5 }).map(() => `
+        <div class="rounded-lg border border-slate-200/10 bg-white/[0.045] p-4">
+          <div class="flex gap-3">
+            <div class="skeleton h-10 w-10 rounded-lg"></div>
+            <div class="flex-1 space-y-2">
+              <div class="skeleton h-4 w-3/4 rounded"></div>
+              <div class="skeleton h-3 w-full rounded"></div>
+              <div class="skeleton h-3 w-1/2 rounded"></div>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function uniqueSorted(values) {
+      return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
+    }
+
+    function formatCount(value) {
+      if (value >= 1000) {
+        return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k`;
+      }
+      return String(value);
+    }
+
+    function isConfiguredApi() {
+      return GOOGLE_SHEETS_API_URL && !GOOGLE_SHEETS_API_URL.includes("TU_URL_DE_APPS_SCRIPT");
+    }
+
+    function whatsAppUrl(phone) {
+      const clean = phone.replace(/[^\d]/g, "");
+      return `https://wa.me/${clean}`;
+    }
+
+    function instagramUrl(value) {
+      const clean = value.replace(/^@/, "").replace(/^https?:\/\/(www\.)?instagram\.com\//, "").replace(/\/$/, "");
+      return `https://instagram.com/${clean}`;
+    }
+
+    function normalizeUrl(value) {
+      return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+    }
+
+    function removeAccents(value) {
+      return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    window.addEventListener("load", init);
+    window.addEventListener("resize", () => setTimeout(() => app.map?.invalidateSize(), 120));
+  </script>
+</body>
+</html>
