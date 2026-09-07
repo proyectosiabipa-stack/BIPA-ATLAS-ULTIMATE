@@ -11,9 +11,6 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -298,7 +295,8 @@
     }
 
     @media (max-width: 900px) {
-      html, body {
+      html,
+      body {
         height: 100%;
         overflow: hidden;
         overscroll-behavior: none;
@@ -360,10 +358,26 @@
         margin-bottom: 150px !important;
       }
 
-      .sidebar header { padding: 0 16px 12px !important; }
-      .sidebar header .mb-4 { margin-bottom: 10px !important; }
-      .sidebar h1 { font-size: 20px !important; line-height: 1.15 !important; }
-      .sidebar header p, #newRecordBtn { display: none; }
+      .sidebar header {
+        padding: 0 16px 12px !important;
+      }
+
+      .sidebar header .mb-4 {
+        margin-bottom: 10px !important;
+      }
+
+      .sidebar h1 {
+        font-size: 20px !important;
+        line-height: 1.15 !important;
+      }
+
+      .sidebar header p {
+        display: none;
+      }
+
+      #newRecordBtn {
+        display: none;
+      }
 
       .sidebar > section {
         padding-left: 16px !important;
@@ -377,13 +391,35 @@
         padding-bottom: 10px !important;
       }
 
-      .stat-card { min-height: 66px; padding: 10px !important; }
-      .stat-card strong { font-size: 22px !important; }
-      #typeTabs { gap: 6px; }
+      .stat-card {
+        min-height: 66px;
+        padding: 10px !important;
+      }
 
-      .type-tab, #fitBtn, #refreshBtn { min-height: 44px; }
-      #searchInput, #stateFilter, #zoneFilter { min-height: 46px; font-size: 16px; }
-      .record-card { padding: 14px !important; }
+      .stat-card strong {
+        font-size: 22px !important;
+      }
+
+      #typeTabs {
+        gap: 6px;
+      }
+
+      .type-tab,
+      #fitBtn,
+      #refreshBtn {
+        min-height: 44px;
+      }
+
+      #searchInput,
+      #stateFilter,
+      #zoneFilter {
+        min-height: 46px;
+        font-size: 16px;
+      }
+
+      .record-card {
+        padding: 14px !important;
+      }
 
       #list {
         padding-left: 16px !important;
@@ -391,7 +427,11 @@
         padding-bottom: calc(18px + env(safe-area-inset-bottom)) !important;
       }
 
-      .modal-backdrop { align-items: end; padding: 0; }
+      .modal-backdrop {
+        align-items: end;
+        padding: 0;
+      }
+
       .modal-card {
         width: 100%;
         max-width: none;
@@ -399,8 +439,15 @@
         border-radius: 18px 18px 0 0;
       }
 
-      .modal-card .scroll-area { max-height: calc(94dvh - 148px) !important; }
-      .modal-card input, .modal-card select { min-height: 48px; font-size: 16px; }
+      .modal-card .scroll-area {
+        max-height: calc(94dvh - 148px) !important;
+      }
+
+      .modal-card input,
+      .modal-card select {
+        min-height: 48px;
+        font-size: 16px;
+      }
 
       #toast {
         left: 12px;
@@ -419,67 +466,178 @@
         grid-template-columns: 1fr;
       }
 
-      .stat-card span { font-size: 11px !important; }
+      .stat-card span {
+        font-size: 11px !important;
+      }
+    }
+  </style>
+  <style>
+    .light-ui,
+    .light-ui .sidebar,
+    .light-ui .modal-card {
+      color: #0f172a;
     }
 
-    /* Light Theme Overrides */
-    .light-ui, .light-ui .sidebar, .light-ui .modal-card { color: #0f172a; }
-    .light-ui .sidebar .text-white, .light-ui .modal-card .text-white,
-    .light-ui .sidebar .text-slate-100, .light-ui .modal-card .text-slate-100 { color: #0f172a !important; }
-    .light-ui .sidebar .text-slate-200, .light-ui .modal-card .text-slate-200 { color: #1e293b !important; }
-    .light-ui .sidebar .text-slate-300, .light-ui .modal-card .text-slate-300 { color: #334155 !important; }
-    .light-ui .sidebar .text-slate-400, .light-ui .modal-card .text-slate-400,
-    .light-ui .sidebar .text-slate-500, .light-ui .modal-card .text-slate-500 { color: #475569 !important; }
+    .light-ui .sidebar .text-white,
+    .light-ui .modal-card .text-white,
+    .light-ui .sidebar .text-slate-100,
+    .light-ui .modal-card .text-slate-100 {
+      color: #0f172a !important;
+    }
 
-    .light-ui .sidebar .bg-white\/\[0\.045\], .light-ui .modal-card .bg-white\/\[0\.045\],
-    .light-ui .sidebar .bg-white\/5, .light-ui .modal-card .bg-white\/5 { background-color: rgba(255, 255, 255, 0.96) !important; }
+    .light-ui .sidebar .text-slate-200,
+    .light-ui .modal-card .text-slate-200 {
+      color: #1e293b !important;
+    }
 
-    .light-ui .sidebar .bg-slate-950\/35, .light-ui .sidebar .bg-slate-950\/45,
-    .light-ui .sidebar .bg-slate-950\/55, .light-ui .modal-card .bg-slate-950\/55 { background-color: rgba(255, 255, 255, 0.98) !important; }
+    .light-ui .sidebar .text-slate-300,
+    .light-ui .modal-card .text-slate-300 {
+      color: #334155 !important;
+    }
 
-    .light-ui .sidebar .border-slate-200\/10, .light-ui .modal-card .border-slate-200\/10 { border-color: rgba(15, 23, 42, 0.12) !important; }
-    .light-ui .sidebar .text-cyan-200\/80, .light-ui .mobile-map-top .text-cyan-200\/80 { color: #0e7490 !important; }
-    .light-ui .sidebar .text-emerald-100\/70 { color: #047857 !important; }
-    .light-ui .sidebar .text-rose-100\/70 { color: #be123c !important; }
-    .light-ui .sidebar .text-emerald-200, .light-ui .modal-card .text-emerald-200 { color: #047857 !important; }
-    .light-ui .sidebar .text-rose-200, .light-ui .modal-card .text-rose-200 { color: #be123c !important; }
+    .light-ui .sidebar .text-slate-400,
+    .light-ui .modal-card .text-slate-400,
+    .light-ui .sidebar .text-slate-500,
+    .light-ui .modal-card .text-slate-500 {
+      color: #475569 !important;
+    }
 
-    .light-ui .sidebar .bg-emerald-300\/\[0\.07\], .light-ui .sidebar .bg-emerald-300\/10,
-    .light-ui .modal-card .bg-emerald-300\/10 { background-color: rgba(209, 250, 229, 0.95) !important; }
+    .light-ui .sidebar .bg-white\/\[0\.045\],
+    .light-ui .modal-card .bg-white\/\[0\.045\],
+    .light-ui .sidebar .bg-white\/5,
+    .light-ui .modal-card .bg-white\/5 {
+      background-color: rgba(255, 255, 255, 0.96) !important;
+    }
 
-    .light-ui .sidebar .bg-rose-300\/\[0\.07\], .light-ui .sidebar .bg-rose-300\/10,
-    .light-ui .modal-card .bg-rose-300\/10 { background-color: rgba(255, 228, 230, 0.96) !important; }
+    .light-ui .sidebar .bg-slate-950\/35,
+    .light-ui .sidebar .bg-slate-950\/45,
+    .light-ui .sidebar .bg-slate-950\/55,
+    .light-ui .modal-card .bg-slate-950\/55 {
+      background-color: rgba(255, 255, 255, 0.98) !important;
+    }
 
-    .light-ui .sidebar .border-emerald-300\/15, .light-ui .modal-card .border-emerald-300\/15 { border-color: rgba(5, 150, 105, 0.32) !important; }
-    .light-ui .sidebar .border-rose-300\/15, .light-ui .modal-card .border-rose-300\/15 { border-color: rgba(225, 29, 72, 0.32) !important; }
+    .light-ui .sidebar .border-slate-200\/10,
+    .light-ui .modal-card .border-slate-200\/10 {
+      border-color: rgba(15, 23, 42, 0.12) !important;
+    }
 
-    .light-ui .sidebar .bg-cyan-300 { background-color: #0891b2 !important; color: #ffffff !important; }
+    .light-ui .sidebar .text-cyan-200\/80,
+    .light-ui .mobile-map-top .text-cyan-200\/80 {
+      color: #0e7490 !important;
+    }
 
-    .light-ui .sidebar .badge-client, .light-ui .modal-card .badge-client,
-    .leaflet-popup-content-wrapper .badge-client { background: #047857 !important; border-color: #047857 !important; color: #ffffff !important; }
+    .light-ui .sidebar .text-emerald-100\/70 {
+      color: #047857 !important;
+    }
 
-    .light-ui .sidebar .badge-competition, .light-ui .modal-card .badge-competition,
-    .leaflet-popup-content-wrapper .badge-competition { background: #be123c !important; border-color: #be123c !important; color: #ffffff !important; }
+    .light-ui .sidebar .text-rose-100\/70 {
+      color: #be123c !important;
+    }
 
-    .light-ui .sidebar .record-meta, .leaflet-popup-content-wrapper .record-meta { color: #334155 !important; }
-    .light-ui .sidebar .record-subtle, .leaflet-popup-content-wrapper .record-subtle { color: #475569 !important; }
-    .light-ui .sidebar .text-slate-950 { color: #0f172a !important; }
+    .light-ui .sidebar .text-emerald-200,
+    .light-ui .modal-card .text-emerald-200 {
+      color: #047857 !important;
+    }
 
-    .light-ui input, .light-ui select, .light-ui textarea { color: #0f172a !important; }
-    .light-ui input::placeholder, .light-ui textarea::placeholder { color: #94a3b8 !important; }
+    .light-ui .sidebar .text-rose-200,
+    .light-ui .modal-card .text-rose-200 {
+      color: #be123c !important;
+    }
 
-    .light-ui #toast { background: rgba(255, 255, 255, 0.9) !important; color: #0f172a !important; box-shadow: 0 20px 54px rgba(15, 23, 42, .16); }
-    .light-ui #loadingOverlay { background: rgba(241, 245, 249, 0.42) !important; }
+    .light-ui .sidebar .bg-emerald-300\/\[0\.07\],
+    .light-ui .sidebar .bg-emerald-300\/10,
+    .light-ui .modal-card .bg-emerald-300\/10 {
+      background-color: rgba(209, 250, 229, 0.95) !important;
+    }
 
-    .light-ui #loadingOverlay > div, .light-ui .mobile-map-top > div {
+    .light-ui .sidebar .bg-rose-300\/\[0\.07\],
+    .light-ui .sidebar .bg-rose-300\/10,
+    .light-ui .modal-card .bg-rose-300\/10 {
+      background-color: rgba(255, 228, 230, 0.96) !important;
+    }
+
+    .light-ui .sidebar .border-emerald-300\/15,
+    .light-ui .modal-card .border-emerald-300\/15 {
+      border-color: rgba(5, 150, 105, 0.32) !important;
+    }
+
+    .light-ui .sidebar .border-rose-300\/15,
+    .light-ui .modal-card .border-rose-300\/15 {
+      border-color: rgba(225, 29, 72, 0.32) !important;
+    }
+
+    .light-ui .sidebar .bg-cyan-300 {
+      background-color: #0891b2 !important;
+      color: #ffffff !important;
+    }
+
+    .light-ui .sidebar .badge-client,
+    .light-ui .modal-card .badge-client,
+    .leaflet-popup-content-wrapper .badge-client {
+      background: #047857 !important;
+      border-color: #047857 !important;
+      color: #ffffff !important;
+    }
+
+    .light-ui .sidebar .badge-competition,
+    .light-ui .modal-card .badge-competition,
+    .leaflet-popup-content-wrapper .badge-competition {
+      background: #be123c !important;
+      border-color: #be123c !important;
+      color: #ffffff !important;
+    }
+
+    .light-ui .sidebar .record-meta,
+    .leaflet-popup-content-wrapper .record-meta {
+      color: #334155 !important;
+    }
+
+    .light-ui .sidebar .record-subtle,
+    .leaflet-popup-content-wrapper .record-subtle {
+      color: #475569 !important;
+    }
+
+    .light-ui .sidebar .text-slate-950 {
+      color: #0f172a !important;
+    }
+
+    .light-ui input,
+    .light-ui select,
+    .light-ui textarea {
+      color: #0f172a !important;
+    }
+
+    .light-ui input::placeholder,
+    .light-ui textarea::placeholder {
+      color: #94a3b8 !important;
+    }
+
+    .light-ui #toast {
+      background: rgba(255, 255, 255, 0.9) !important;
+      color: #0f172a !important;
+      box-shadow: 0 20px 54px rgba(15, 23, 42, .16);
+    }
+
+    .light-ui #loadingOverlay {
+      background: rgba(241, 245, 249, 0.42) !important;
+    }
+
+    .light-ui #loadingOverlay > div,
+    .light-ui .mobile-map-top > div {
       background: rgba(255, 255, 255, 0.86) !important;
       color: #0f172a;
       border-color: rgba(15, 23, 42, 0.12) !important;
     }
 
-    .light-ui .leaflet-container { filter: saturate(1.04) contrast(1.01); }
+    .light-ui .leaflet-container {
+      filter: saturate(1.04) contrast(1.01);
+    }
 
-    .app-brand { color: #075985 !important; letter-spacing: .18em; font-weight: 900; }
+    .app-brand {
+      color: #075985 !important;
+      letter-spacing: .18em;
+      font-weight: 900;
+    }
 
     .primary-action {
       background: linear-gradient(135deg, #0f766e, #0369a1) !important;
@@ -488,29 +646,84 @@
       box-shadow: 0 14px 34px rgba(3, 105, 161, .22);
     }
 
-    .primary-action:hover { filter: brightness(1.05); box-shadow: 0 18px 42px rgba(15, 118, 110, .28); }
+    .primary-action:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 18px 42px rgba(15, 118, 110, .28);
+    }
 
-    .type-tab { color: #1e293b !important; }
+    .type-tab {
+      color: #1e293b !important;
+    }
+
     .type-tab.is-active {
       background: #0f766e !important;
       color: #ffffff !important;
       box-shadow: 0 10px 22px rgba(15, 118, 110, .22);
     }
 
-    .stat-card { background: #ffffff !important; border-color: rgba(15, 23, 42, .15) !important; }
-    .stat-card strong { color: #0f172a !important; }
+    .stat-card {
+      background: #ffffff !important;
+      border-color: rgba(15, 23, 42, .15) !important;
+    }
 
-    .stat-client { background: #d1fae5 !important; border-color: rgba(5, 150, 105, .38) !important; }
-    .stat-client strong, .stat-client span { color: #065f46 !important; }
+    .stat-card strong {
+      color: #0f172a !important;
+    }
 
-    .stat-competition { background: #ffe4e6 !important; border-color: rgba(190, 18, 60, .38) !important; }
-    .stat-competition strong, .stat-competition span { color: #9f1239 !important; }
+    .stat-client {
+      background: #d1fae5 !important;
+      border-color: rgba(5, 150, 105, .38) !important;
+    }
 
-    .contact-popup { width: 310px; padding: 16px; color: #0f172a; }
-    .popup-title { margin-top: 10px; color: #0f172a; font-size: 18px; line-height: 1.15; font-weight: 900; }
-    .popup-details { display: grid; gap: 8px; margin-top: 14px; color: #334155; font-size: 13px; line-height: 1.35; }
-    .popup-details b { color: #0f172a; font-weight: 900; }
-    .popup-actions { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 16px; }
+    .stat-client strong,
+    .stat-client span {
+      color: #065f46 !important;
+    }
+
+    .stat-competition {
+      background: #ffe4e6 !important;
+      border-color: rgba(190, 18, 60, .38) !important;
+    }
+
+    .stat-competition strong,
+    .stat-competition span {
+      color: #9f1239 !important;
+    }
+
+    .contact-popup {
+      width: 310px;
+      padding: 16px;
+      color: #0f172a;
+    }
+
+    .popup-title {
+      margin-top: 10px;
+      color: #0f172a;
+      font-size: 18px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .popup-details {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+      color: #334155;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .popup-details b {
+      color: #0f172a;
+      font-weight: 900;
+    }
+
+    .popup-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 16px;
+    }
 
     .popup-action {
       min-height: 42px;
@@ -528,38 +741,78 @@
       transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
     }
 
-    .popup-action:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 14px 30px rgba(15, 23, 42, .2); }
-    .popup-action svg { width: 16px; height: 16px; stroke-width: 2.7; }
+    .popup-action:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, .2);
+    }
+
+    .popup-action svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.7;
+    }
 
     .popup-whatsapp { background: #047857; }
     .popup-instagram { background: linear-gradient(135deg, #be123c, #7c3aed); }
     .popup-web { background: #075985; }
 
-    .record-card { background: #ffffff !important; border-color: rgba(15, 23, 42, .14) !important; }
-    .record-card:hover { border-color: rgba(15, 118, 110, .46) !important; }
+    .record-card {
+      background: #ffffff !important;
+      border-color: rgba(15, 23, 42, .14) !important;
+    }
 
-    .record-icon-client { background: #d1fae5 !important; border-color: #34d399 !important; color: #047857 !important; }
-    .record-icon-competition { background: #ffe4e6 !important; border-color: #fb7185 !important; color: #be123c !important; }
+    .record-card:hover {
+      border-color: rgba(15, 118, 110, .46) !important;
+    }
 
-    .record-title { color: #0f172a !important; font-weight: 900; }
-    .record-meta, .record-subtle { font-weight: 650; }
+    .record-icon-client {
+      background: #d1fae5 !important;
+      border-color: #34d399 !important;
+      color: #047857 !important;
+    }
 
-    .form-input, #searchInput, #stateFilter, #zoneFilter {
+    .record-icon-competition {
+      background: #ffe4e6 !important;
+      border-color: #fb7185 !important;
+      color: #be123c !important;
+    }
+
+    .record-title {
+      color: #0f172a !important;
+      font-weight: 900;
+    }
+
+    .record-meta,
+    .record-subtle {
+      font-weight: 650;
+    }
+
+    .form-input,
+    #searchInput,
+    #stateFilter,
+    #zoneFilter {
       border-color: rgba(15, 23, 42, .18) !important;
       background: #ffffff !important;
       color: #0f172a !important;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7);
     }
 
-    #searchInput::placeholder { color: #64748b !important; opacity: 1; }
+    #searchInput::placeholder {
+      color: #64748b !important;
+      opacity: 1;
+    }
 
-    .light-ui #mobileNewBtn, .light-ui #saveBtn {
+    .light-ui #mobileNewBtn,
+    .light-ui #saveBtn {
       background: linear-gradient(135deg, #0f766e, #0369a1) !important;
       color: #ffffff !important;
       box-shadow: 0 14px 34px rgba(3, 105, 161, .22);
     }
 
-    .light-ui #saveBtn svg, .light-ui #mobileNewBtn svg, .primary-action svg {
+    .light-ui #saveBtn svg,
+    .light-ui #mobileNewBtn svg,
+    .primary-action svg {
       color: #ffffff !important;
       stroke: currentColor;
     }
@@ -735,17 +988,19 @@
             <input name="INSTAGRAM" placeholder="@usuario" class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
           </label>
           <label class="block">
-            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Página Web</span>
-            <input name="WEB" placeholder="https://ejemplo.com" class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Correo</span>
+            <input name="CORREO" type="email" class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
+          </label>
+          <label class="block md:col-span-2">
+            <span class="mb-1 block text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Web</span>
+            <input name="WEB" placeholder="https://..." class="form-input w-full rounded-lg border border-slate-200/10 bg-slate-950/55 px-3 py-3 text-sm text-white outline-none focus:border-cyan-300/40" />
           </label>
         </div>
       </div>
 
       <div class="flex items-center justify-end gap-3 border-t border-slate-200/10 px-5 py-4">
-        <button type="button" id="cancelBtn" class="rounded-lg border border-slate-200/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-slate-300 transition hover:bg-white/10">
-          Cancelar
-        </button>
-        <button type="submit" id="saveBtn" class="primary-action flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold transition">
+        <button type="button" id="cancelBtn" class="rounded-lg border border-slate-200/10 bg-white/5 px-4 py-2.5 text-sm font-bold text-slate-200 transition hover:bg-white/10">Cancelar</button>
+        <button id="saveBtn" type="submit" class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-emerald-300 to-cyan-300 px-4 py-2.5 text-sm font-extrabold text-slate-950 shadow-glow transition hover:brightness-110">
           <i data-lucide="save" class="h-4 w-4"></i>
           Guardar
         </button>
@@ -753,374 +1008,681 @@
     </form>
   </div>
 
-  <datalist id="venezuelaStates">
-    <option value="Amazonas"></option>
-    <option value="Anzoátegui"></option>
-    <option value="Apure"></option>
-    <option value="Aragua"></option>
-    <option value="Barinas"></option>
-    <option value="Bolívar"></option>
-    <option value="Carabobo"></option>
-    <option value="Cojedes"></option>
-    <option value="Delta Amacuro"></option>
-    <option value="Distrito Capital"></option>
-    <option value="Falcón"></option>
-    <option value="Guárico"></option>
-    <option value="Lara"></option>
-    <option value="Mérida"></option>
-    <option value="Miranda"></option>
-    <option value="Monagas"></option>
-    <option value="Nueva Esparta"></option>
-    <option value="Portuguesa"></option>
-    <option value="Sucre"></option>
-    <option value="Táchira"></option>
-    <option value="Trujillo"></option>
-    <option value="La Guaira"></option>
-    <option value="Yaracuy"></option>
-    <option value="Zulia"></option>
-  </datalist>
+  <datalist id="venezuelaStates"></datalist>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
   <script>
-    // Reemplaza esta URL con la endpoint de tu Apps Script
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWQrmcFE5a8k9_O1oZB7X4qkLwvB9O7d8Z529-90hxb5BiERmH_4Vk5WRo8ojQj0Y/exec";
+    const GOOGLE_SHEETS_API_URL = "TU_URL_DE_APPS_SCRIPT_AQUI";
 
-    let map;
-    let markerCluster;
-    let rawData = [];
-    let markersMap = new Map();
+    const FALLBACK_DATA = [
+      {
+        TIPO: "CLIENTE",
+        NOMBRE: "Farmacia Altamira",
+        ZONA: "Altamira",
+        ESTADO: "Distrito Capital",
+        DIRECCION: "Av. Luis Roche, Altamira",
+        COORDENADAS: "10.5006, -66.8516",
+        TELEFONO: "+58 412 123 4567",
+        INSTAGRAM: "@farmaciaaltamira",
+        CORREO: "contacto@altamira.demo",
+        WEB: "https://example.com"
+      },
+      {
+        TIPO: "COMPETENCIA",
+        NOMBRE: "Market Salud Chacao",
+        ZONA: "Chacao",
+        ESTADO: "Miranda",
+        DIRECCION: "Centro Chacao",
+        COORDENADAS: "10.4942, -66.8558",
+        TELEFONO: "+58 414 555 1200",
+        INSTAGRAM: "@marketsalud",
+        CORREO: "",
+        WEB: ""
+      },
+      {
+        TIPO: "CLIENTE",
+        NOMBRE: "Distribuidora Lago",
+        ZONA: "Maracaibo",
+        ESTADO: "Zulia",
+        DIRECCION: "Av. 5 de Julio",
+        COORDENADAS: "10.6500, -71.6333",
+        TELEFONO: "+58 424 987 3301",
+        INSTAGRAM: "",
+        CORREO: "ventas@lago.demo",
+        WEB: ""
+      }
+    ];
 
-    const filters = {
-      search: "",
-      type: "TODOS",
-      state: "",
-      zone: ""
+    const STATE_COORDS = {
+      "Amazonas": [5.6639, -67.6236],
+      "Anzoategui": [9.0797, -64.6667],
+      "Anzoátegui": [9.0797, -64.6667],
+      "Apure": [7.8940, -67.4731],
+      "Aragua": [10.2469, -67.5958],
+      "Barinas": [8.6226, -70.2075],
+      "Bolivar": [8.1292, -63.5409],
+      "Bolívar": [8.1292, -63.5409],
+      "Carabobo": [10.1620, -68.0077],
+      "Cojedes": [9.6580, -68.5827],
+      "Delta Amacuro": [9.0622, -62.0510],
+      "Distrito Capital": [10.5000, -66.9167],
+      "Falcon": [11.1811, -69.8597],
+      "Falcón": [11.1811, -69.8597],
+      "Guarico": [9.9115, -67.3538],
+      "Guárico": [9.9115, -67.3538],
+      "Lara": [10.0678, -69.3474],
+      "Merida": [8.5897, -71.1561],
+      "Mérida": [8.5897, -71.1561],
+      "Miranda": [10.2500, -66.4167],
+      "Monagas": [9.7457, -63.1832],
+      "Nueva Esparta": [10.9971, -63.9113],
+      "Portuguesa": [9.0944, -69.0970],
+      "Sucre": [10.4635, -64.1775],
+      "Tachira": [7.9137, -72.1416],
+      "Táchira": [7.9137, -72.1416],
+      "Trujillo": [9.3658, -70.4360],
+      "La Guaira": [10.6016, -66.9346],
+      "Vargas": [10.6016, -66.9346],
+      "Yaracuy": [10.3394, -68.7425],
+      "Zulia": [10.6500, -71.6333]
     };
 
-    document.addEventListener("DOMContentLoaded", () => {
+    const app = {
+      map: null,
+      cluster: null,
+      records: [],
+      filtered: [],
+      markers: new Map(),
+      pageSize: 40,
+      renderedCount: 0,
+      filters: { q: "", type: "TODOS", state: "", zone: "" }
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const listEl = $("#list");
+    const loadingOverlay = $("#loadingOverlay");
+    const sidebar = $("#sidebar");
+
+    function init() {
+      lucide.createIcons();
       initMap();
-      setupEventListeners();
-      fetchData();
-    });
+      bindEvents();
+      fillStateDatalist();
+      loadRecords();
+    }
 
     function initMap() {
-      map = L.map("map", {
-        zoomControl: true,
-        attributionControl: false
-      }).setView([8.0000, -66.0000], 6);
+      app.map = L.map("map", {
+        zoomControl: false,
+        preferCanvas: true,
+        minZoom: 5,
+        maxBounds: L.latLngBounds([0.4, -74.8], [13.8, -58.2]),
+        maxBoundsViscosity: 0.75
+      }).setView([7.7, -66.2], 6);
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19
-      }).addTo(map);
+      L.control.zoom({ position: "bottomright" }).addTo(app.map);
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 20
+      }).addTo(app.map);
 
-      markerCluster = L.markerClusterGroup({
+      app.cluster = L.markerClusterGroup({
         showCoverageOnHover: false,
-        zoomToBoundsOnClick: true,
         spiderfyOnMaxZoom: true,
+        spiderLegPolylineOptions: { weight: 2, color: "#0f172a", opacity: 0.55 },
+        zoomToBoundsOnClick: true,
+        removeOutsideVisibleBounds: true,
+        chunkedLoading: true,
+        chunkInterval: 160,
+        chunkDelay: 35,
+        maxClusterRadius: (zoom) => zoom >= 15 ? 18 : zoom >= 12 ? 30 : 48,
         iconCreateFunction: (cluster) => {
           const count = cluster.getChildCount();
-          let cClass = "cluster-small";
-          if (count > 20) cClass = "cluster-medium";
-          if (count > 50) cClass = "cluster-large";
-
+          const size = count >= 500 ? 66 : count >= 100 ? 56 : 48;
+          const level = count >= 500 ? "large" : count >= 100 ? "medium" : "small";
           return L.divIcon({
-            html: `<div>${count}</div>`,
-            className: `marker-cluster ${cClass}`,
-            iconSize: L.point(40, 40)
+            html: `<div><span>${formatCount(count)}</span></div>`,
+            className: `marker-cluster cluster-${level}`,
+            iconSize: L.point(size, size)
           });
         }
       });
 
-      map.addLayer(markerCluster);
+      app.map.addLayer(app.cluster);
     }
 
-    async function fetchData() {
+    function bindEvents() {
+      $("#newRecordBtn").addEventListener("click", openModal);
+      $("#mobileNewBtn").addEventListener("click", openModal);
+      $("#closeModalBtn").addEventListener("click", closeModal);
+      $("#cancelBtn").addEventListener("click", closeModal);
+      $("#modal").addEventListener("click", (event) => {
+        if (event.target.id === "modal") closeModal();
+      });
+      $("#recordForm").addEventListener("submit", saveRecord);
+      $("#refreshBtn").addEventListener("click", loadRecords);
+      $("#fitBtn").addEventListener("click", fitVisibleMarkers);
+      $("#sheetToggle").addEventListener("click", () => {
+        sidebar.classList.toggle("expanded");
+        setTimeout(() => app.map.invalidateSize(), 340);
+      });
+
+      ["searchInput", "stateFilter", "zoneFilter"].forEach((id) => {
+        $(`#${id}`).addEventListener("focus", expandMobileSheet);
+        $(`#${id}`).addEventListener("click", expandMobileSheet);
+      });
+
+      $("#searchInput").addEventListener("input", (event) => {
+        app.filters.q = event.target.value.trim().toLowerCase();
+        applyFilters(true);
+      });
+
+      $("#stateFilter").addEventListener("change", (event) => {
+        app.filters.state = event.target.value;
+        rebuildZoneFilter();
+        applyFilters(true);
+      });
+
+      $("#zoneFilter").addEventListener("change", (event) => {
+        app.filters.zone = event.target.value;
+        applyFilters(true);
+      });
+
+      document.querySelectorAll(".type-tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          expandMobileSheet();
+          setTypeFilter(button.dataset.type);
+        });
+      });
+
+      document.querySelectorAll(".stat-card").forEach((button) => {
+        button.addEventListener("click", () => setTypeFilter(button.dataset.statFilter));
+      });
+
+      listEl.addEventListener("scroll", () => {
+        const nearBottom = listEl.scrollTop + listEl.clientHeight >= listEl.scrollHeight - 220;
+        if (nearBottom) renderMoreCards();
+      });
+    }
+
+    async function loadRecords() {
       showLoading(true);
+      app.markers.clear();
+      app.cluster.clearLayers();
+      listEl.innerHTML = renderSkeletonCards();
+
       try {
-        const res = await fetch(SCRIPT_URL);
-        const data = await res.json();
-        rawData = Array.isArray(data) ? data : (data.records || []);
-        
-        populateFilters();
-        render();
-      } catch (err) {
-        console.error("Error al cargar los datos:", err);
-        showToast("Error al conectar con Google Sheets", true);
+        let data;
+        if (!isConfiguredApi()) {
+          data = FALLBACK_DATA;
+          showToast("Usando datos demo. Configura GOOGLE_SHEETS_API_URL para conectar Sheets.", "info");
+        } else {
+          const payload = await fetchSheetData();
+          data = extractSheetRows(payload);
+        }
+
+        app.records = await normalizeRecords(data);
+        rebuildFilters();
+        applyFilters(false);
+        fitVisibleMarkers();
+      } catch (error) {
+        console.error(error);
+        app.records = await normalizeRecords(FALLBACK_DATA);
+        rebuildFilters();
+        applyFilters(false);
+        fitVisibleMarkers();
+        showToast(error.message || "No se pudo conectar. Mostrando datos demo.", "error");
       } finally {
         showLoading(false);
       }
     }
 
-    function populateFilters() {
-      const stateSelect = document.getElementById("stateFilter");
-      const zoneSelect = document.getElementById("zoneFilter");
-
-      const states = new Set();
-      const zones = new Set();
-
-      rawData.forEach(item => {
-        if (item.ESTADO) states.add(item.ESTADO.trim());
-        if (item.ZONA) zones.add(item.ZONA.trim());
+    async function fetchSheetData() {
+      const url = `${GOOGLE_SHEETS_API_URL}${GOOGLE_SHEETS_API_URL.includes("?") ? "&" : "?"}_=${Date.now()}`;
+      const response = await fetch(url, {
+        method: "GET",
+        cache: "no-store",
+        redirect: "follow"
       });
+      if (!response.ok) throw new Error(`Google Sheets respondió ${response.status}`);
 
-      stateSelect.innerHTML = '<option value="">Todos</option>' + 
-        [...states].sort().map(s => `<option value="${s}">${s}</option>`).join("");
-      
-      zoneSelect.innerHTML = '<option value="">Todas</option>' + 
-        [...zones].sort().map(z => `<option value="${z}">${z}</option>`).join("");
+      const text = await response.text();
+      if (!text.trim()) throw new Error("La API respondió vacío");
+
+      try {
+        return JSON.parse(text);
+      } catch (error) {
+        console.error("Respuesta no JSON:", text);
+        throw new Error("La API no devolvió JSON válido");
+      }
     }
 
-    function getFilteredData() {
-      return rawData.filter(item => {
-        const matchesType = filters.type === "TODOS" || (item.TIPO && item.TIPO.toUpperCase() === filters.type);
-        const matchesState = !filters.state || item.ESTADO === filters.state;
-        const matchesZone = !filters.zone || item.ZONA === filters.zone;
-        
-        const q = filters.search.toLowerCase();
-        const matchesSearch = !q || 
-          (item.NOMBRE && item.NOMBRE.toLowerCase().includes(q)) ||
-          (item.DIRECCION && item.DIRECCION.toLowerCase().includes(q)) ||
-          (item.ZONA && item.ZONA.toLowerCase().includes(q));
-
-        return matchesType && matchesState && matchesZone && matchesSearch;
-      });
+    function extractSheetRows(payload) {
+      if (Array.isArray(payload)) return payload;
+      if (payload && payload.ok === false) throw new Error(payload.error || "La API devolvió un error");
+      if (Array.isArray(payload?.data)) return payload.data;
+      if (Array.isArray(payload?.records)) return payload.records;
+      if (Array.isArray(payload?.rows)) return payload.rows;
+      throw new Error("La API no devolvió una lista de registros");
     }
 
-    function render() {
-      const filtered = getFilteredData();
-
-      document.getElementById("totalCount").textContent = rawData.length;
-      document.getElementById("clientCount").textContent = rawData.filter(r => r.TIPO?.toUpperCase() === "CLIENTE").length;
-      document.getElementById("competitionCount").textContent = rawData.filter(r => r.TIPO?.toUpperCase() === "COMPETENCIA").length;
-      document.getElementById("visibleCount").textContent = filtered.length;
-
-      renderMapMarkers(filtered);
-      renderList(filtered);
-      if (window.lucide) lucide.createIcons();
-    }
-
-    function renderMapMarkers(data) {
-      markerCluster.clearLayers();
-      markersMap.clear();
-
-      data.forEach((item, index) => {
-        if (!item.COORDENADAS) return;
-        const parts = item.COORDENADAS.split(",").map(c => parseFloat(c.trim()));
-        if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) return;
-
-        const isClient = item.TIPO?.toUpperCase() === "CLIENTE";
-        const markerClass = isClient ? "marker-client" : "marker-competition";
-        const iconName = isClient ? "user-check" : "building-2";
-
-        const customIcon = L.divIcon({
-          className: "custom-marker-wrapper",
-          html: `
-            <div class="custom-marker ${markerClass}">
-              <span class="marker-icon"><i data-lucide="${iconName}"></i></span>
-            </div>
-          `,
-          iconSize: [34, 34],
-          iconAnchor: [17, 17]
+    async function normalizeRecords(records) {
+      const cleaned = [];
+      for (const raw of records) {
+        const record = {};
+        ["TIPO", "NOMBRE", "ZONA", "ESTADO", "DIRECCION", "COORDENADAS", "TELEFONO", "INSTAGRAM", "CORREO", "WEB"].forEach((key) => {
+          record[key] = String(raw[key] ?? "").trim();
         });
 
-        const marker = L.marker([parts[0], parts[1]], { icon: customIcon });
-        marker.bindPopup(buildPopupHTML(item));
+        record.TIPO = normalizeType(record.TIPO);
+        const parsed = parseCoordinates(record.COORDENADAS);
+        if (parsed) {
+          record.lat = parsed[0];
+          record.lng = parsed[1];
+          record.coordSource = "sheet";
+        } else {
+          const geo = await geocodeRecord(record);
+          record.lat = geo[0];
+          record.lng = geo[1];
+          record.coordSource = geo[2];
+        }
+        record.id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`;
+        cleaned.push(record);
+      }
+      return cleaned;
+    }
 
-        markerCluster.addLayer(marker);
-        markersMap.set(index, marker);
+    function normalizeType(value) {
+      const upper = removeAccents(value).toUpperCase();
+      return upper.includes("COMP") ? "COMPETENCIA" : "CLIENTE";
+    }
+
+    function parseCoordinates(value) {
+      if (!value) return null;
+      const match = value.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
+      if (!match) return null;
+      const lat = Number(match[1]);
+      const lng = Number(match[2]);
+      if (Number.isFinite(lat) && Number.isFinite(lng)) return [lat, lng];
+      return null;
+    }
+
+    async function geocodeRecord(record) {
+      const fallback = findStateCoords(record.ESTADO);
+      const query = [record.DIRECCION, record.ZONA, record.ESTADO, "Venezuela"].filter(Boolean).join(", ");
+
+      if (query.length > 12) {
+        try {
+          const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ve&q=${encodeURIComponent(query)}`;
+          const response = await fetch(url, { headers: { "Accept": "application/json" } });
+          if (response.ok) {
+            const data = await response.json();
+            if (data[0]?.lat && data[0]?.lon) return [Number(data[0].lat), Number(data[0].lon), "nominatim"];
+          }
+        } catch (error) {
+          console.warn("Nominatim fallback:", error);
+        }
+      }
+
+      return [...fallback, "estado"];
+    }
+
+    function findStateCoords(state) {
+      const clean = removeAccents(state).toLowerCase();
+      const entry = Object.entries(STATE_COORDS).find(([name]) => removeAccents(name).toLowerCase() === clean);
+      return entry ? entry[1] : [8.3, -66.6];
+    }
+
+    function rebuildFilters() {
+      const states = uniqueSorted(app.records.map((record) => record.ESTADO));
+      fillSelect($("#stateFilter"), states, "Todos");
+      rebuildZoneFilter();
+      updateStats();
+    }
+
+    function rebuildZoneFilter() {
+      const zones = uniqueSorted(app.records
+        .filter((record) => !app.filters.state || record.ESTADO === app.filters.state)
+        .map((record) => record.ZONA));
+      fillSelect($("#zoneFilter"), zones, "Todas");
+      if (app.filters.zone && !zones.includes(app.filters.zone)) app.filters.zone = "";
+      $("#zoneFilter").value = app.filters.zone;
+    }
+
+    function fillStateDatalist() {
+      $("#venezuelaStates").innerHTML = Object.keys(STATE_COORDS)
+        .filter((name, index, arr) => arr.indexOf(name) === index)
+        .sort((a, b) => a.localeCompare(b, "es"))
+        .map((name) => `<option value="${escapeHtml(name)}"></option>`)
+        .join("");
+    }
+
+    function fillSelect(select, values, allLabel) {
+      const previous = select.value;
+      select.innerHTML = `<option value="">${allLabel}</option>` + values.map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`).join("");
+      select.value = values.includes(previous) ? previous : "";
+    }
+
+    function setTypeFilter(type) {
+      app.filters.type = type;
+      document.querySelectorAll(".type-tab").forEach((button) => {
+        const active = button.dataset.type === type;
+        button.className = active
+          ? "type-tab is-active rounded-md px-2 py-2 text-xs font-bold transition"
+          : "type-tab rounded-md px-2 py-2 text-xs font-bold transition hover:bg-white/5";
+      });
+      applyFilters(true);
+    }
+
+    function applyFilters(animate) {
+      const q = app.filters.q;
+      app.filtered = app.records.filter((record) => {
+        const text = `${record.NOMBRE} ${record.DIRECCION} ${record.ZONA}`.toLowerCase();
+        const matchText = !q || removeAccents(text).includes(removeAccents(q));
+        const matchType = app.filters.type === "TODOS" || record.TIPO === app.filters.type;
+        const matchState = !app.filters.state || record.ESTADO === app.filters.state;
+        const matchZone = !app.filters.zone || record.ZONA === app.filters.zone;
+        return matchText && matchType && matchState && matchZone;
+      });
+
+      updateStats();
+      renderMarkers();
+      renderCards(true);
+      $("#visibleCount").textContent = app.filtered.length;
+
+      if (animate && window.gsap) {
+        gsap.fromTo(".record-card", { opacity: 0, y: 8 }, { opacity: 1, y: 0, stagger: 0.025, duration: 0.28, ease: "power2.out" });
+      }
+    }
+
+    function updateStats() {
+      $("#totalCount").textContent = app.records.length;
+      $("#clientCount").textContent = app.records.filter((record) => record.TIPO === "CLIENTE").length;
+      $("#competitionCount").textContent = app.records.filter((record) => record.TIPO === "COMPETENCIA").length;
+    }
+
+    function renderMarkers() {
+      app.cluster.clearLayers();
+      app.markers.clear();
+      app.filtered.forEach((record) => {
+        const marker = L.marker([record.lat, record.lng], { icon: makeIcon(record.TIPO) });
+        marker.bindPopup(makePopup(record), { closeButton: true, offset: [0, -4] });
+        marker.on("click", () => highlightCard(record.id));
+        app.markers.set(record.id, marker);
+        app.cluster.addLayer(marker);
       });
     }
 
-    function buildPopupHTML(item) {
-      const isClient = item.TIPO?.toUpperCase() === "CLIENTE";
-      const badgeClass = isClient ? "badge-client" : "badge-competition";
-      
-      const cleanPhone = item.TELEFONO ? item.TELEFONO.replace(/\D/g, "") : "";
-      const cleanInsta = item.INSTAGRAM ? item.INSTAGRAM.replace("@", "").trim() : "";
+    function makeIcon(type) {
+      const isClient = type === "CLIENTE";
+      const iconName = isClient ? "store" : "swords";
+      return L.divIcon({
+        className: "marker-icon",
+        html: `<div class="custom-marker ${isClient ? "marker-client" : "marker-competition"}"><i data-lucide="${iconName}"></i></div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
+        popupAnchor: [0, -18]
+      });
+    }
 
+    function makePopup(record) {
+      const isClient = record.TIPO === "CLIENTE";
       return `
-        <div class="contact-popup">
-          <span class="inline-block rounded-md px-2 py-0.5 text-xs font-bold ${badgeClass}">
-            ${item.TIPO || "REGISTRO"}
-          </span>
-          <h3 class="popup-title">${item.NOMBRE || "Sin Nombre"}</h3>
+        <article class="contact-popup">
+          <div class="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <span class="rounded-full ${isClient ? "badge-client" : "badge-competition"} px-2.5 py-1 text-[11px] font-extrabold">${record.TIPO}</span>
+              <h3 class="popup-title">${escapeHtml(record.NOMBRE || "Sin nombre")}</h3>
+            </div>
+          </div>
           <div class="popup-details">
-            <p><b>Zona/Estado:</b> ${item.ZONA || "-"}, ${item.ESTADO || "-"}</p>
-            <p><b>Dirección:</b> ${item.DIRECCION || "No especificada"}</p>
+            <p><b class="text-slate-100">Estado:</b> ${escapeHtml(record.ESTADO || "N/D")}</p>
+            <p><b class="text-slate-100">Zona:</b> ${escapeHtml(record.ZONA || "N/D")}</p>
+            <p><b class="text-slate-100">Teléfono:</b> ${escapeHtml(record.TELEFONO || "N/D")}</p>
           </div>
           <div class="popup-actions">
-            ${cleanPhone ? `
-              <a href="https://wa.me/${cleanPhone}" target="_blank" class="popup-action popup-whatsapp">
-                <i data-lucide="message-circle"></i> WhatsApp
-              </a>
-            ` : ""}
-            ${cleanInsta ? `
-              <a href="https://instagram.com/${cleanInsta}" target="_blank" class="popup-action popup-instagram">
-                <i data-lucide="instagram"></i> Instagram
-              </a>
-            ` : ""}
-            ${item.WEB ? `
-              <a href="${item.WEB.startsWith("http") ? item.WEB : "https://" + item.WEB}" target="_blank" class="popup-action popup-web">
-                <i data-lucide="globe"></i> Sitio Web
-              </a>
-            ` : ""}
+            ${record.TELEFONO ? popupLink(whatsAppUrl(record.TELEFONO), "WhatsApp", "message-circle", "emerald") : ""}
+            ${record.INSTAGRAM ? popupLink(instagramUrl(record.INSTAGRAM), "Instagram", "instagram", "pink") : ""}
+            ${record.WEB ? popupLink(normalizeUrl(record.WEB), "Web", "globe", "cyan") : ""}
           </div>
+        </article>
+      `;
+    }
+
+    function popupLink(href, label, icon, tone) {
+      const tones = {
+        emerald: "popup-whatsapp",
+        pink: "popup-instagram",
+        cyan: "popup-web"
+      };
+      return `<a target="_blank" rel="noopener" class="popup-action ${tones[tone]}" href="${href}"><i data-lucide="${icon}"></i><span>${label}</span></a>`;
+    }
+
+    function renderCards(reset) {
+      if (reset) {
+        app.renderedCount = 0;
+        listEl.innerHTML = "";
+      }
+      renderMoreCards();
+    }
+
+    function renderMoreCards() {
+      const next = app.filtered.slice(app.renderedCount, app.renderedCount + app.pageSize);
+      if (!next.length && app.renderedCount === 0) {
+        listEl.innerHTML = `
+          <div class="rounded-lg border border-slate-200/10 bg-white/[0.045] p-5 text-center">
+            <i data-lucide="map-pin-off" class="mx-auto mb-3 h-8 w-8 text-slate-400"></i>
+            <p class="font-semibold text-slate-200">No hay registros visibles</p>
+            <p class="mt-1 text-sm text-slate-400">Prueba con otros filtros.</p>
+          </div>`;
+        lucide.createIcons();
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      next.forEach((record) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.id = record.id;
+        button.className = "record-card w-full rounded-lg border border-slate-200/10 bg-white/[0.045] p-4 text-left";
+        button.innerHTML = makeCard(record);
+        button.addEventListener("click", () => selectRecord(record.id));
+        fragment.appendChild(button);
+      });
+      listEl.appendChild(fragment);
+      app.renderedCount += next.length;
+      lucide.createIcons();
+    }
+
+    function makeCard(record) {
+      const isClient = record.TIPO === "CLIENTE";
+      const tone = isClient ? "record-icon-client" : "record-icon-competition";
+      const badge = isClient ? "badge-client" : "badge-competition";
+      return `
+        <div class="flex items-start gap-3">
+          <span class="grid h-10 w-10 flex-none place-items-center rounded-lg ${tone} border">
+            <i data-lucide="${isClient ? "store" : "swords"}" class="h-5 w-5"></i>
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="flex items-center justify-between gap-2">
+              <strong class="record-title truncate text-sm">${escapeHtml(record.NOMBRE || "Sin nombre")}</strong>
+              <span class="rounded-full ${badge} px-2 py-1 text-[10px] font-extrabold">${record.TIPO}</span>
+            </span>
+            <span class="record-subtle mt-1 block truncate text-xs">${escapeHtml(record.DIRECCION || "Sin dirección")}</span>
+            <span class="record-meta mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+              <span class="flex items-center gap-1"><i data-lucide="map-pin" class="h-3.5 w-3.5"></i>${escapeHtml(record.ESTADO || "N/D")}</span>
+              <span class="flex items-center gap-1"><i data-lucide="navigation" class="h-3.5 w-3.5"></i>${escapeHtml(record.ZONA || "N/D")}</span>
+            </span>
+          </span>
         </div>
       `;
     }
 
-    function renderList(data) {
-      const listContainer = document.getElementById("list");
-      if (data.length === 0) {
-        listContainer.innerHTML = `
-          <div class="py-8 text-center text-slate-400">
-            <p class="text-sm">No se encontraron registros</p>
-          </div>
-        `;
-        return;
+    function selectRecord(id) {
+      const record = app.filtered.find((item) => item.id === id);
+      const marker = app.markers.get(id);
+      if (!record || !marker) return;
+      const isMobile = window.matchMedia("(max-width: 900px)").matches;
+      app.map.flyTo([record.lat, record.lng], Math.max(app.map.getZoom(), 14), { animate: true, duration: 1.15 });
+      setTimeout(() => {
+        marker.openPopup();
+        lucide.createIcons();
+      }, 650);
+      highlightCard(id);
+      if (isMobile) sidebar.classList.remove("expanded");
+    }
+
+    function expandMobileSheet() {
+      if (window.matchMedia("(max-width: 900px)").matches) {
+        sidebar.classList.add("expanded");
+        setTimeout(() => app.map.invalidateSize(), 340);
       }
+    }
 
-      listContainer.innerHTML = data.map((item, idx) => {
-        const isClient = item.TIPO?.toUpperCase() === "CLIENTE";
-        const iconStyle = isClient ? "record-icon-client" : "record-icon-competition";
-        const iconName = isClient ? "user-check" : "building-2";
-
-        return `
-          <div class="record-card cursor-pointer rounded-lg border p-3.5 transition" data-record-index="${idx}">
-            <div class="flex items-start gap-3">
-              <div class="grid h-9 w-9 shrink-0 place-items-center rounded-lg border ${iconStyle}">
-                <i data-lucide="${iconName}" class="h-4 w-4"></i>
-              </div>
-              <div class="min-w-0 flex-1">
-                <h4 class="record-title truncate text-sm font-bold">${item.NOMBRE || "Sin Nombre"}</h4>
-                <p class="record-meta text-xs text-slate-500">${item.ZONA || "-"}, ${item.ESTADO || "-"}</p>
-                <p class="record-subtle truncate text-xs text-slate-400">${item.DIRECCION || ""}</p>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      listContainer.querySelectorAll(".record-card").forEach(card => {
-        card.addEventListener("click", () => {
-          const idx = parseInt(card.dataset.recordIndex, 10);
-          const item = data[idx];
-          if (item && item.COORDENADAS) {
-            const parts = item.COORDENADAS.split(",").map(c => parseFloat(c.trim()));
-            if (parts.length === 2 && !isNaN(parts[0])) {
-              map.flyTo([parts[0], parts[1]], 15, { duration: 1.2 });
-              const marker = markersMap.get(idx);
-              if (marker) marker.openPopup();
-              
-              if (window.innerWidth <= 900) {
-                document.getElementById("sidebar").classList.remove("expanded");
-              }
-            }
-          }
-        });
+    function highlightCard(id) {
+      document.querySelectorAll(".record-card").forEach((card) => {
+        const active = card.dataset.id === id;
+        card.classList.toggle("border-cyan-300/60", active);
+        card.classList.toggle("bg-cyan-300/10", active);
+        if (active) card.scrollIntoView({ behavior: "smooth", block: "nearest" });
       });
     }
 
-    function setupEventListeners() {
-      document.getElementById("searchInput").addEventListener("input", (e) => {
-        filters.search = e.target.value;
-        render();
-      });
+    async function saveRecord(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const saveBtn = $("#saveBtn");
+      const formData = new FormData(form);
+      const payload = Object.fromEntries(formData.entries());
+      payload.TIPO = normalizeType(payload.TIPO);
 
-      document.getElementById("stateFilter").addEventListener("change", (e) => {
-        filters.state = e.target.value;
-        render();
-      });
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span class="h-4 w-4 animate-spin rounded-full border-2 border-slate-950/30 border-t-slate-950"></span> Guardando`;
 
-      document.getElementById("zoneFilter").addEventListener("change", (e) => {
-        filters.zone = e.target.value;
-        render();
-      });
-
-      document.querySelectorAll(".type-tab").forEach(tab => {
-        tab.addEventListener("click", () => {
-          document.querySelectorAll(".type-tab").forEach(t => t.classList.remove("is-active"));
-          tab.classList.add("is-active");
-          filters.type = tab.dataset.type;
-          render();
-        });
-      });
-
-      document.querySelectorAll("[data-stat-filter]").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const type = btn.dataset.statFilter;
-          filters.type = type;
-          document.querySelectorAll(".type-tab").forEach(t => {
-            t.classList.toggle("is-active", t.dataset.type === type);
-          });
-          render();
-        });
-      });
-
-      document.getElementById("fitBtn").addEventListener("click", () => {
-        if (markerCluster.getLayers().length > 0) {
-          map.fitBounds(markerCluster.getBounds(), { padding: [40, 40] });
-        }
-      });
-
-      document.getElementById("refreshBtn").addEventListener("click", fetchData);
-
-      const modal = document.getElementById("modal");
-      const openModal = () => modal.classList.add("open");
-      const closeModal = () => {
-        modal.classList.remove("open");
-        document.getElementById("recordForm").reset();
-      };
-
-      document.getElementById("newRecordBtn").addEventListener("click", openModal);
-      document.getElementById("mobileNewBtn").addEventListener("click", openModal);
-      document.getElementById("closeModalBtn").addEventListener("click", closeModal);
-      document.getElementById("cancelBtn").addEventListener("click", closeModal);
-
-      const sidebar = document.getElementById("sidebar");
-      document.getElementById("sheetToggle").addEventListener("click", () => {
-        sidebar.classList.toggle("expanded");
-      });
-
-      document.getElementById("recordForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const payload = Object.fromEntries(formData.entries());
-
-        showLoading(true);
-        try {
-          await fetch(SCRIPT_URL, {
+      try {
+        if (isConfiguredApi()) {
+          const response = await fetch(GOOGLE_SHEETS_API_URL, {
             method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
           });
-
-          showToast("Registro guardado con éxito");
-          closeModal();
-          setTimeout(fetchData, 1200);
-        } catch (err) {
-          console.error("Error al guardar:", err);
-          showToast("Error al guardar el registro", true);
-          showLoading(false);
+          if (!response.ok) throw new Error("No se pudo guardar");
         }
-      });
+
+        const [record] = await normalizeRecords([payload]);
+        app.records.unshift(record);
+        form.reset();
+        closeModal();
+        rebuildFilters();
+        applyFilters(true);
+        selectRecord(record.id);
+        showToast("Registro guardado y agregado al mapa.", "success");
+      } catch (error) {
+        console.error(error);
+        showToast("No se pudo guardar el registro.", "error");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `<i data-lucide="save" class="h-4 w-4"></i> Guardar`;
+        lucide.createIcons();
+      }
+    }
+
+    function openModal() {
+      $("#modal").classList.add("open");
+      setTimeout(() => document.querySelector("[name='NOMBRE']").focus(), 120);
+      if (window.gsap) gsap.fromTo(".form-input", { opacity: 0, y: 8 }, { opacity: 1, y: 0, stagger: 0.025, duration: .24, ease: "power2.out" });
+    }
+
+    function closeModal() {
+      $("#modal").classList.remove("open");
+    }
+
+    function fitVisibleMarkers() {
+      const markers = Array.from(app.markers.values());
+      if (!markers.length) return app.map.flyTo([7.7, -66.2], 6, { duration: .9 });
+      const group = L.featureGroup(markers);
+      app.map.fitBounds(group.getBounds().pad(0.18), { animate: true, duration: 1, maxZoom: 14 });
     }
 
     function showLoading(show) {
-      document.getElementById("loadingOverlay").style.display = show ? "grid" : "none";
+      loadingOverlay.style.display = show ? "grid" : "none";
     }
 
-    function showToast(message, isError = false) {
-      const toast = document.getElementById("toast");
-      const text = document.getElementById("toastText");
-      
-      text.textContent = message;
-      toast.classList.toggle("border-rose-300/20", isError);
-      toast.classList.toggle("border-emerald-300/20", !isError);
-      
+    function showToast(message, type = "success") {
+      const toast = $("#toast");
+      const icon = type === "error" ? "alert-triangle" : type === "info" ? "info" : "check-circle-2";
+      const color = type === "error" ? "text-rose-300" : type === "info" ? "text-cyan-300" : "text-emerald-300";
+      $("#toastText").textContent = message;
+      toast.querySelector("i").setAttribute("data-lucide", icon);
+      toast.querySelector("i").className = `h-5 w-5 ${color}`;
+      lucide.createIcons();
       toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 3500);
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 3400);
     }
+
+    function renderSkeletonCards() {
+      return Array.from({ length: 5 }).map(() => `
+        <div class="rounded-lg border border-slate-200/10 bg-white/[0.045] p-4">
+          <div class="flex gap-3">
+            <div class="skeleton h-10 w-10 rounded-lg"></div>
+            <div class="flex-1 space-y-2">
+              <div class="skeleton h-4 w-3/4 rounded"></div>
+              <div class="skeleton h-3 w-full rounded"></div>
+              <div class="skeleton h-3 w-1/2 rounded"></div>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function uniqueSorted(values) {
+      return [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b, "es"));
+    }
+
+    function formatCount(value) {
+      if (value >= 1000) {
+        return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k`;
+      }
+      return String(value);
+    }
+
+    function isConfiguredApi() {
+      return GOOGLE_SHEETS_API_URL && !GOOGLE_SHEETS_API_URL.includes("TU_URL_DE_APPS_SCRIPT");
+    }
+
+    function whatsAppUrl(phone) {
+      const clean = phone.replace(/[^\d]/g, "");
+      return `https://wa.me/${clean}`;
+    }
+
+    function instagramUrl(value) {
+      const clean = value.replace(/^@/, "").replace(/^https?:\/\/(www\.)?instagram\.com\//, "").replace(/\/$/, "");
+      return `https://instagram.com/${clean}`;
+    }
+
+    function normalizeUrl(value) {
+      return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+    }
+
+    function removeAccents(value) {
+      return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    window.addEventListener("load", init);
+    window.addEventListener("resize", () => setTimeout(() => app.map?.invalidateSize(), 120));
   </script>
 </body>
 </html>
